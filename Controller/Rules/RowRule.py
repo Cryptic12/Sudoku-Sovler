@@ -20,4 +20,6 @@ class RowRule:
 
     def getAffectedPositions(self, position):
         row, _ = position
-        return set(self.getRowPositions(row))
+        affectedPositions = set(self.getRowPositions(row))
+        affectedPositions.remove(position)
+        return affectedPositions

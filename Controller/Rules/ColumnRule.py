@@ -22,4 +22,6 @@ class ColumnRule:
 
     def getAffectedPositions(self, position):
         _, column = position
-        return set(self.getColumnPositions(column))
+        affectedPositions = set(self.getColumnPositions(column))
+        affectedPositions.remove(position)
+        return affectedPositions

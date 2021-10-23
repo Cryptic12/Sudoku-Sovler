@@ -26,8 +26,8 @@ class SquareRule:
 
     def getSquarePositions(self, square: int):
         positions = []
-        rowBase = (square % self._squareSize) * self._squareSize
-        columnBase = math.floor(square / self._squareSize) * self._squareSize
+        rowBase = math.floor(square / self._squareSize) * self._squareSize
+        columnBase = (square % self._squareSize) * self._squareSize
         for row in range(self._squareSize):
             for column in range(self._squareSize):
                 positions.append((rowBase + row, columnBase + column))
@@ -44,7 +44,9 @@ class SquareRule:
         row, column = position
         square = math.floor(row / self._squareSize) * 3 + \
             math.floor(column / self._squareSize)
-        return set(self.getSquarePositions(square))
+        affectedPositions = set(self.getSquarePositions(square))
+        affectedPositions.remove(position)
+        return affectedPositions
 
     def _baseCalculator(self, base):
         return math.floor(base / self._squareSize) * self._squareSize
