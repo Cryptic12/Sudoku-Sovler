@@ -6,78 +6,81 @@ class ForcedPositionsInSquareReducer():
         If they are, we can remove that value as a possibility from all other positions within the square.
     """
 
-    def __init__(self, squareRule):
-        self._squareRule = squareRule
+    def __init__(self, square_rule):
+        self._square_rule = square_rule
 
     def reduce(self, possibilities):
-        possibilities = self.reduceByRow(possibilities)
-        possibilities = self.reduceByColumn(possibilities)
+        possibilities = self.reduce_by_row(possibilities)
+        possibilities = self.reduce_by_column(possibilities)
         return possibilities
 
-    def reduceByRow(self, possibilities):
-        possibleValues = []
-        possibilitiesSize = len(possibilities)
-        for value in range(0, possibilitiesSize):
-            possibleValues.append(str(value + 1))
+    def reduce_by_row(self, possibilities):
+        POSSIBILITIES_SIZE = len(possibilities)
+        possible_values = []
 
-        for value in possibleValues:
-            for row in range(possibilitiesSize):
-                positionsContainingValue = []
-                for column in range(possibilitiesSize):
+        for value in range(0, POSSIBILITIES_SIZE):
+            possible_values.append(str(value + 1))
+
+        for value in possible_values:
+            for row in range(POSSIBILITIES_SIZE):
+                positions_containing_value = []
+                for column in range(POSSIBILITIES_SIZE):
                     if value in possibilities[row][column]:
-                        positionsContainingValue.append((row, column))
+                        positions_containing_value.append((row, column))
 
                 #  Check if all positions containing the value are within the same square
-                squarePositions = set()
-                for positionContainingValue in positionsContainingValue:
-                    if len(squarePositions) == 0:
-                        squarePositions = self._squareRule.getAffectedPositions(
-                            positionContainingValue)
+                square_positions = set()
+                for position_containing_value in positions_containing_value:
+                    if len(square_positions) == 0:
+                        square_positions = self._square_rule.get_affected_positions(
+                            position_containing_value)
                     else:
-                        squarePositions = squarePositions.union(
-                            self._squareRule.getAffectedPositions(positionContainingValue))
+                        square_positions = square_positions.union(
+                            self._square_rule.get_affected_positions(position_containing_value))
 
-                if len(squarePositions) == possibilitiesSize:
-                    for position in squarePositions:
-                        squareRow, squarecolumn = position
-                        if squareRow != row and value in possibilities[squareRow][squarecolumn]:
-                            positionPossibilities = possibilities[squareRow][squarecolumn].copy(
+                if len(square_positions) == POSSIBILITIES_SIZE:
+                    for position in square_positions:
+                        square_row, square_column = position
+                        if square_row != row and value in possibilities[square_row][square_column]:
+                            position_possibilities = possibilities[square_row][square_column].copy(
                             )
-                            positionPossibilities.remove(value)
-                            possibilities[squareRow][squarecolumn] = positionPossibilities
+                            position_possibilities.remove(value)
+                            possibilities[square_row][square_column] = position_possibilities
 
         return possibilities
 
-    def reduceByColumn(self, possibilities):
-        possibleValues = []
-        possibilitiesSize = len(possibilities)
-        for value in range(0, possibilitiesSize):
-            possibleValues.append(str(value + 1))
+    def reduce_by_column(self, possibilities):
 
-        for value in possibleValues:
-            for column in range(possibilitiesSize):
-                positionsContainingValue = []
-                for row in range(possibilitiesSize):
+        POSSIBILITIES_SIZE = len(possibilities)
+        possible_values = []
+
+        for value in range(0, POSSIBILITIES_SIZE):
+            possible_values.append(str(value + 1))
+
+        for value in possible_values:
+            for column in range(POSSIBILITIES_SIZE):
+                positions_containing_value = []
+                for row in range(POSSIBILITIES_SIZE):
                     if value in possibilities[row][column]:
-                        positionsContainingValue.append((row, column))
+                        positions_containing_value.append((row, column))
 
                 #  Check if all positions containing the value are within the same square
-                squarePositions = set()
-                for positionContainingValue in positionsContainingValue:
-                    if len(squarePositions) == 0:
-                        squarePositions = self._squareRule.getAffectedPositions(
-                            positionContainingValue)
+                square_positions = set()
+                for position_containing_value in positions_containing_value:
+                    if len(square_positions) == 0:
+                        square_positions = self._square_rule.get_affected_positions(
+                            position_containing_value)
                     else:
-                        squarePositions = squarePositions.union(
-                            self._squareRule.getAffectedPositions(positionContainingValue))
+                        square_positions = square_positions.union(
+                            self._square_rule.get_affected_positions(position_containing_value))
 
-                if len(squarePositions) == possibilitiesSize:
-                    for position in squarePositions:
-                        squareRow, squarecolumn = position
-                        if squarecolumn != column and value in possibilities[squareRow][squarecolumn]:
-                            positionPossibilities = possibilities[squareRow][squarecolumn].copy(
+                if len(square_positions) == POSSIBILITIES_SIZE:
+                    for position in square_positions:
+                        square_row, square_column = position
+                        if square_column != column and value in possibilities[square_row][square_column]:
+                            position_possibilities = possibilities[square_row][square_column].copy(
                             )
-                            positionPossibilities.remove(value)
-                            possibilities[squareRow][squarecolumn] = positionPossibilities
+                            position_possibilities.remove(value)
+                            possibilities[square_row][square_column] = position_possibilities
 
         return possibilities

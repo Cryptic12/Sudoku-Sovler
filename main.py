@@ -31,38 +31,38 @@ def main():
     """ Load the config"""
     CONFIG_PATH = os.path.join(os.getcwd(), 'config.cfg')
 
-    sudokuConfig = SudokuConfig(CONFIG_PATH)
-    sudokuLoader = SudokuLoader(os.path.join(
-        os.getcwd(), sudokuConfig.getFileName()))
+    sudoku_config = SudokuConfig(CONFIG_PATH)
+    sudoku_loader = SudokuLoader(os.path.join(
+        os.getcwd(), sudoku_config.get_file_name()))
 
     """ Setup Model """
-    sudokuModel = SudokuModel(sudokuLoader.getSudokuBoard(),
-                              sudokuConfig.getBoardSize(), sudokuConfig.getSquareSize())
+    sudoku_model = SudokuModel(sudoku_loader.get_sudoku_board(),
+                               sudoku_config.get_board_size(), sudoku_config.get_square_size())
 
     """ Setup Solver """
-    squareRule = SquareRule(
-        sudokuConfig.getSquareSize())
-    rules = [RowRule(), ColumnRule(), squareRule]
-    sudokuRules = SudokuRules(rules)
+    square_rule = SquareRule(
+        sudoku_config.get_square_size())
+    rules = [RowRule(), ColumnRule(), square_rule]
+    sudoku_rules = SudokuRules(rules)
 
     """ Setup Reducer """
     reducers = [OnePositionReducer(
-        sudokuConfig.getBoardSize(), sudokuConfig.getSquareSize(), rules), ForcedPositionsReducer(sudokuConfig.getBoardSize(), sudokuConfig.getSquareSize()),
-        ForcedPositionsInSquareReducer(squareRule)]
-    possibilitiesReducer = PossibilitiesReducer(reducers)
+        sudoku_config.get_board_size(), sudoku_config.get_square_size(), rules), ForcedPositionsReducer(sudoku_config.get_board_size(), sudoku_config.get_square_size()),
+        ForcedPositionsInSquareReducer(square_rule)]
+    possibilities_reducer = PossibilitiesReducer(reducers)
 
-    sudokuController = SudokuController(
-        sudokuModel, sudokuRules, possibilitiesReducer)
+    sudoku_controller = SudokuController(
+        sudoku_model, sudoku_rules, possibilities_reducer)
 
     """ Setup Display """
-    sudokuView = SudokuDisplay(
-        sudokuController.solveSudoku)
-    sudokuView.loadBoard(sudokuModel.getBoard())
+    sudoku_view = SudokuDisplay(
+        sudoku_controller.solve_sudoku)
+    sudoku_view.load_board(sudoku_model.get_board())
 
-    sudokuViewSubscriber = Subscriber(sudokuView.update)
-    sudokuModel.subscribe(sudokuViewSubscriber)
+    sudoku_view_subscriber = Subscriber(sudoku_view.update)
+    sudoku_model.subscribe(sudoku_view_subscriber)
 
-    sudokuView.startDisplay()
+    sudoku_view.start_display()
 
     print("Sudoku Solver Completed")
 

@@ -1,25 +1,25 @@
 class RowRule:
 
-    def isAllowed(self, board, value, position):
+    def is_allowed(self, board, value, position):
         x, _ = position
-        rowToTest = board[x]
-        return value not in rowToTest
+        row_to_test = board[x]
+        return value not in row_to_test
 
-    def getRowPositions(self, row: int):
+    def get_positions(self, row: int):
         positions = []
         for column in range(9):
             positions.append((row, column))
-        # print(f"Row: {positions}")
+
         return positions
 
-    def getAllRowPositions(self):
+    def get_all_positions(self):
         rows = []
         for row in range(9):
-            rows.append(self.getRowPositions(row))
+            rows.append(self.get_positions(row))
         return rows
 
-    def getAffectedPositions(self, position):
+    def get_affected_positions(self, position):
         row, _ = position
-        affectedPositions = set(self.getRowPositions(row))
-        affectedPositions.remove(position)
-        return affectedPositions
+        affected_positions = set(self.get_positions(row))
+        affected_positions.remove(position)
+        return affected_positions

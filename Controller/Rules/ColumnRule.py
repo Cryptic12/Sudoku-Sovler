@@ -1,27 +1,27 @@
 class ColumnRule:
 
-    def isAllowed(self, board, value, position):
+    def is_allowed(self, board, value, position):
         _, column = position
         for row in board:
             if row[column] == value:
                 return False
         return True
 
-    def getColumnPositions(self, column: int):
+    def get_positions(self, column: int):
         positions = []
         for row in range(9):
             positions.append((row, column))
         # print(f"Column: {positions}")
         return positions
 
-    def getAllColumnPositions(self):
+    def get_all_positions(self):
         columns = []
         for column in range(9):
-            columns.append(self.getColumnPositions(column))
+            columns.append(self.get_positions(column))
         return columns
 
-    def getAffectedPositions(self, position):
+    def get_affected_positions(self, position):
         _, column = position
-        affectedPositions = set(self.getColumnPositions(column))
-        affectedPositions.remove(position)
-        return affectedPositions
+        affected_positions = set(self.get_positions(column))
+        affected_positions.remove(position)
+        return affected_positions

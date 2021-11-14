@@ -9,143 +9,141 @@ class SudokuModel:
 
     _board = None
     _possibilities = None
-    _boardSize = 9
-    _squareSize = 3
+    _board_size = 9
+    _square_size = 3
     _subscribers = []
-    _subscriberIds = set()
-    _maxSubs = 100
+    _subscriber_ids = set()
+    _max_subs = 100
 
-    def __init__(self, board=None, boardSize=9, squareSize=3):
+    def __init__(self, board=None, board_size=9, square_size=3):
 
-        self._boardSize = boardSize
-        self._squareSize = squareSize
+        self._board_size = board_size
+        self._square_size = square_size
 
         if board is None:
-            self.initEmptyBoard()
+            self.init_empty_board()
             return
 
-        self.verifyBoard(board)
+        self.verify_board(board)
         self._board = board
 
-    def verifyBoard(self, board):
+    def verify_board(self, board):
 
-        if len(board) != self._boardSize:
+        if len(board) != self._board_size:
             raise ValueError(
-                f'Row count not equal to board size. Expected {self._boardSize} recieved {len(board)}')
+                f'Row count not equal to board size. Expected {self._board_size} recieved {len(board)}')
 
-        for i in range(0, self._boardSize):
-            if (len(board[i]) != self._boardSize):
+        for i in range(0, self._board_size):
+            if (len(board[i]) != self._board_size):
                 raise ValueError(
-                    f'Column count in row {i + 1} not equal to board size. Expected {self._boardSize} recieved {len(board)}')
+                    f'Column count in row {i + 1} not equal to board size. Expected {self._board_size} recieved {len(board)}')
 
-        pass
-
-    def initEmptyBoard(self):
+    def init_empty_board(self):
         board = []
         row = []
-        for i in range(0, self._boardSize):
+        for i in range(0, self._board_size):
             row.append('')
 
-        for i in range(0, self._boardSize):
+        for i in range(0, self._board_size):
             board.append(row)
 
         self._board = board
 
-    def __notify(self, event):
+    def _notify(self, event):
         for subscriber in self._subscribers:
             subscriber.notify(event)
 
     def notify(self, event):
-        self.__notify(event)
+        self._notify(event)
 
     def subscribe(self, subscriber):
         id = 0
-        while id < self._maxSubs:
-            if id in self._subscriberIds:
+        while id < self._max_subs:
+            if id in self._subscriber_ids:
                 id += 1
             else:
-                self._subscriberIds.add(id)
-                subscriber.setId(id)
+                self._subscriber_ids.add(id)
+                subscriber.set_id(id)
                 self._subscribers.append(subscriber)
                 return subscriber
 
     def unsubscribe(self, id):
-        if (id in self._subscriberIds):
+        if (id in self._subscriber_ids):
             for i in range(0, len(self._subscribers)):
                 subscriber = self._subscribers[i]
-                if (subscriber.getId() == id):
+                if (subscriber.get_id() == id):
                     self._subscribers.pop(i)
                     return True
 
         return False
 
-    def getBoard(self):
+    def get_board(self):
         return self._board
 
-    def getBoardSize(self):
-        return self._boardSize
+    def get_board_size(self):
+        return self._board_size
 
-    def getRow(self, row):
+    def get_row(self, row):
         return self._board[row]
 
-    def getColumn(self, column):
+    def get_column(self, column):
         values = []
-        for i in range(0, self._boardSize):
+        for i in range(0, self._board_size):
             values.append(self._board[i][column])
 
         return values
 
-    def getSquare(self, square):
-        toReturn = []
-        columnPos = math.floor(square / self._squareSize) * self._squareSize
-        rowPos = (square % self._squareSize) * self._squareSize
+    def get_square(self, square):
+        to_return = []
+        column_pos = math.floor(square / self._square_size) * self._square_size
+        row_pos = (square % self._square_size) * self._square_size
         board = self._board
-        for x in range(columnPos, columnPos + self._squareSize):
+        for x in range(column_pos, column_pos + self._square_size):
             curRow = board[x]
-            for y in range(rowPos, rowPos + self._squareSize):
+            for y in range(row_pos, row_pos + self._square_size):
                 value = curRow[y]
-                toReturn.append(value)
-        return toReturn
+                to_return.append(value)
+        return to_return
 
-    def getValue(self, position):
+    def get_value(self, position):
         row, column = position
         return self._board[row][column]
 
-    def setValue(self, position, value):
+    def set_value(self, position, value):
         row, column = position
         self._board[row][column] = value
         event = {"event": SudokuEvents.VALUE_UPDATE,
                  "position": position,
                  "value": value}
-        self.__notify(event)
+        self._notify(event)
 
-    def getPossibilities(self):
+    def get_possibilities(self):
         return self._possibilities
 
-    def setPossibilities(self, possibilities):
+    def set_possibilities(self, possibilities):
         self._possibilities = possibilities
 
-    def getPositionPossibilities(self, position):
+    def get_position_possibilities(self, position):
         row, column = position
         return self._possibilities[row][column]
 
-    def setPositionPossibilities(self, position, possibility):
+    def set_position_possibilities(self, position, possibility):
         row, column = position
         self._possibilities[row][column] = possibility
 
 
-def testFunc():
+def test_func():
     print("I have been notified")
 
 
 if __name__ == '__main__':
     sudoku = SudokuModel()
-    subscriber = Subscriber(testFunc)
+    subscriber = Subscriber(test_func)
 
     subscriber = sudoku.subscribe(subscriber)
 
-    print(sudoku.getBoard())
+    print(sudoku.get_board())
 
     sudoku.notify()
-    print(sudoku.unsubscribe(subscriber.getId()))
+    print(sudoku.unsubscribe(subscriber.get_id()))
     sudoku.notify()

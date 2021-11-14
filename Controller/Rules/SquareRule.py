@@ -3,50 +3,50 @@ import math
 
 class SquareRule:
 
-    _squareSize = 3
+    square_size = 3
 
-    def __init__(self, squareSize):
-        self._squareSize = squareSize
+    def __init__(self, square_size):
+        self.square_size = square_size
 
-    def isAllowed(self, board, value, position):
-        row, column = position
+    def is_allowed(self, board, value, position):
+        ROW, COLUMN = position
 
-        rowBase = self._baseCalculator(row)
-        columnBase = self._baseCalculator(column)
+        ROW_BASE = self._base_calculator(ROW)
+        COLUMN_BASE = self._base_calculator(COLUMN)
 
-        for i in range(0, self._squareSize):
-            curRow = rowBase + i
-            for j in range(0, self._squareSize):
-                curColumn = columnBase + j
+        for i in range(0, self.square_size):
+            cur_row = ROW_BASE + i
+            for j in range(0, self.square_size):
+                cur_column = COLUMN_BASE + j
 
-                if board[curRow][curColumn] == value:
+                if board[cur_row][cur_column] == value:
                     return False
 
         return True
 
-    def getSquarePositions(self, square: int):
+    def get_positions(self, square: int):
         positions = []
-        rowBase = math.floor(square / self._squareSize) * self._squareSize
-        columnBase = (square % self._squareSize) * self._squareSize
-        for row in range(self._squareSize):
-            for column in range(self._squareSize):
-                positions.append((rowBase + row, columnBase + column))
-        # print(positions)
+        ROW_BASE = math.floor(square / self.square_size) * self.square_size
+        COLUMN_BASE = (square % self.square_size) * self.square_size
+        for row in range(self.square_size):
+            for column in range(self.square_size):
+                positions.append((ROW_BASE + row, COLUMN_BASE + column))
+
         return positions
 
-    def getAllSquarePositions(self):
+    def get_all_positions(self):
         squares = []
         for square in range(9):
-            squares.append(self.getSquarePositions(square))
+            squares.append(self.get_positions(square))
         return squares
 
-    def getAffectedPositions(self, position):
-        row, column = position
-        square = math.floor(row / self._squareSize) * 3 + \
-            math.floor(column / self._squareSize)
-        affectedPositions = set(self.getSquarePositions(square))
-        affectedPositions.remove(position)
-        return affectedPositions
+    def get_affected_positions(self, position):
+        ROW, COLUMN = position
+        square = math.floor(ROW / self.square_size) * 3 + \
+            math.floor(COLUMN / self.square_size)
+        affected_positions = set(self.get_positions(square))
+        affected_positions.remove(position)
+        return affected_positions
 
-    def _baseCalculator(self, base):
-        return math.floor(base / self._squareSize) * self._squareSize
+    def _base_calculator(self, base):
+        return math.floor(base / self.square_size) * self.square_size

@@ -14,7 +14,7 @@ class TestOnePositionReducer(unittest.TestCase):
     def setUp(self):
 
         self.reducer = OnePositionReducer(BOARD_SIZE, SQUARE_SIZE)
-        self.basePossibilities = [
+        self.base_possibilities = [
             [{'1'}, {'2'}, {'3'}, {'4'}, {'5'}, {'6'}, {'7'}, {'8'}, {'9'}],
             [{'1'}, {'2'}, {'3'}, {'4'}, {'5'}, {'6'}, {'7'}, {'8'}, {'9'}],
             [{'1'}, {'2'}, {'3'}, {'4'}, {'5'}, {'6'}, {'7'}, {'8'}, {'9'}],
@@ -62,57 +62,57 @@ class TestOnePositionReducer(unittest.TestCase):
                                       {'9', '1'}], [], []))
 
         self.tests.append(SudokuTest([{'9'},
-                                {'3'},
-                                {'1', '4'},
-                                {'5', '6'},
-                                {'5', '6'},
-                                {'1', '7'},
-                                {'2'},
-                                {'8'},
-                                {'1', '4', '7'}], [], []))
+                                      {'3'},
+                                      {'1', '4'},
+                                      {'5', '6'},
+                                      {'5', '6'},
+                                      {'1', '7'},
+                                      {'2'},
+                                      {'8'},
+                                      {'1', '4', '7'}], [], []))
 
-    def _assertMsg(self, row, column, modification, possibilities):
-        messageParts = [
+    def _assert_msg(self, row, column, modification, possibilities):
+        message_parts = [
             f"\nRow: {row}, Column: {column} \nModification: {modification} \nPossibilities:"]
-        for curRow in possibilities:
-            messageParts.append(f"{curRow}")
-        return "\n".join(messageParts)
+        for cur_row in possibilities:
+            message_parts.append(f"{cur_row}")
+        return "\n".join(message_parts)
 
     def test_row_mode(self):
         """ Tests that the single value is correctly detected in a row """
         MODIFIED_ROW = 2
         for modification in self.tests:
-            self.basePossibilities[MODIFIED_ROW] = modification.startingValues
-            reducedProbabilities = self.reducer.reduceByRow(
-                self.basePossibilities)
+            self.base_possibilities[MODIFIED_ROW] = modification.starting_values
+            reduced_probabilities = self.reducer.reduce_by_row(
+                self.base_possibilities)
 
             # Check that all the expected reductions and only the expected reductions have been made
-            for i in range(len(self.basePossibilities)):
-                if i in modification.modifiedPositions:
+            for i in range(len(self.base_possibilities)):
+                if i in modification.modified_positions:
                     self.assertSetEqual(
-                        reducedProbabilities[MODIFIED_ROW][i], modification.modifiedValues[modification.modifiedPositions.index(i)], self._assertMsg(MODIFIED_ROW, i, modification, reducedProbabilities))
+                        reduced_probabilities[MODIFIED_ROW][i], modification.modified_values[modification.modified_positions.index(i)], self._assert_msg(MODIFIED_ROW, i, modification, reduced_probabilities))
                 else:
                     self.assertSetEqual(
-                        reducedProbabilities[MODIFIED_ROW][i], self.basePossibilities[MODIFIED_ROW][i], self._assertMsg(MODIFIED_ROW, i, modification, reducedProbabilities))
+                        reduced_probabilities[MODIFIED_ROW][i], self.base_possibilities[MODIFIED_ROW][i], self._assert_msg(MODIFIED_ROW, i, modification, reduced_probabilities))
 
     def test_column_mode(self):
         """ Tests that the single value is correctly detected in a column """
         MODIFIED_COLUMN = 2
         for modification in self.tests:
-            for i in range(len(self.basePossibilities)):
-                self.basePossibilities[i][MODIFIED_COLUMN] = modification.startingValues[i]
+            for i in range(len(self.base_possibilities)):
+                self.base_possibilities[i][MODIFIED_COLUMN] = modification.starting_values[i]
 
-            reducedProbabilities = self.reducer.reduceByColumn(
-                self.basePossibilities)
+            reduced_probabilities = self.reducer.reduce_by_column(
+                self.base_possibilities)
 
             # Check that all the expected reductions and only the expected reductions have been made
-            for i in range(len(self.basePossibilities)):
-                if i in modification.modifiedPositions:
+            for i in range(len(self.base_possibilities)):
+                if i in modification.modified_positions:
                     self.assertSetEqual(
-                        reducedProbabilities[i][MODIFIED_COLUMN], modification.modifiedValues[modification.modifiedPositions.index(i)], self._assertMsg(i, MODIFIED_COLUMN, modification, reducedProbabilities))
+                        reduced_probabilities[i][MODIFIED_COLUMN], modification.modified_values[modification.modified_positions.index(i)], self._assertMsg(i, MODIFIED_COLUMN, modification, reduced_probabilities))
                 else:
                     self.assertSetEqual(
-                        reducedProbabilities[i][MODIFIED_COLUMN], self.basePossibilities[i][MODIFIED_COLUMN], self._assertMsg(i, MODIFIED_COLUMN, modification, reducedProbabilities))
+                        reduced_probabilities[i][MODIFIED_COLUMN], self.base_possibilities[i][MODIFIED_COLUMN], self._assert_msg(i, MODIFIED_COLUMN, modification, reduced_probabilities))
 
     def test_square_mode(self):
         """ Tests that the single value is correctly detected in a square """
@@ -121,32 +121,32 @@ class TestOnePositionReducer(unittest.TestCase):
 
         for modification in self.tests:
 
-            modficationNumber = 0
+            modfication_number = 0
 
             for i in range(3):
                 for j in range(3):
                     row = ROW_BASE + i
                     column = COLUMN_BASE + j
-                    self.basePossibilities[row][column] = modification.startingValues[modficationNumber]
-                    modficationNumber += 1
+                    self.base_possibilities[row][column] = modification.starting_values[modfication_number]
+                    modfication_number += 1
 
-            reducedProbabilities = self.reducer.reduceBySquare(
-                self.basePossibilities)
+            reduced_probabilities = self.reducer.reduce_by_square(
+                self.base_possibilities)
 
             # Check that all the expected reductions and only the expected reductions have been made
             # modficationNumber and checkNumber are used in the same way
-            checkNumber = 0
+            check_number = 0
             for i in range(3):
                 for j in range(3):
                     row = ROW_BASE + i
                     column = COLUMN_BASE + j
-                    if checkNumber in modification.modifiedPositions:
+                    if check_number in modification.modified_positions:
                         self.assertSetEqual(
-                            reducedProbabilities[row][column], modification.modifiedValues[modification.modifiedPositions.index(checkNumber)], self._assertMsg(row, column, modification, reducedProbabilities))
+                            reduced_probabilities[row][column], modification.modified_values[modification.modified_positions.index(check_number)], self._assert_msg(row, column, modification, reduced_probabilities))
                     else:
                         self.assertSetEqual(
-                            reducedProbabilities[row][column], self.basePossibilities[row][column], self._assertMsg(row, column, modification, reducedProbabilities))
-                    checkNumber += 1
+                            reduced_probabilities[row][column], self.base_possibilities[row][column], self._assert_msg(row, column, modification, reduced_probabilities))
+                    check_number += 1
 
 
 class TestForcedPositionsReducer(unittest.TestCase):
@@ -154,7 +154,7 @@ class TestForcedPositionsReducer(unittest.TestCase):
     def setUp(self):
 
         self.reducer = ForcedPositionsReducer(BOARD_SIZE, SQUARE_SIZE)
-        self.basePossibilities = [
+        self.base_possibilities = [
             [{'1'}, {'2'}, {'3'}, {'4'}, {'5'}, {'6'}, {'7'}, {'8'}, {'9'}],
             [{'1'}, {'2'}, {'3'}, {'4'}, {'5'}, {'6'}, {'7'}, {'8'}, {'9'}],
             [{'1'}, {'2'}, {'3'}, {'4'}, {'5'}, {'6'}, {'7'}, {'8'}, {'9'}],
@@ -212,48 +212,48 @@ class TestForcedPositionsReducer(unittest.TestCase):
                                       {'7', '8', '9', '5'},
                                       {'7', '8', '9', '6'}], [0, 1, 2, 6, 7, 8], [{'1', '2', '3'}, {'1', '2', '3'}, {'1', '2', '3'}, {'7', '8', '9'}, {'7', '8', '9'}, {'7', '8', '9'}]))
 
-    def _assertMsg(self, row, column, modification, possibilities):
-        messageParts = [
+    def _assert_msg(self, row, column, modification, possibilities):
+        message_parts = [
             f"\nRow: {row}, Column: {column} \nModification: {modification} \nPossibilities:"]
         for curRow in possibilities:
-            messageParts.append(f"{curRow}")
-        return "\n".join(messageParts)
+            message_parts.append(f"{curRow}")
+        return "\n".join(message_parts)
 
     def test_row(self):
         """ Tests that the single value is correctly detected in a row """
         MODIFIED_ROW = 2
         for modification in self.tests:
-            self.basePossibilities[MODIFIED_ROW] = modification.startingValues
-            reducedProbabilities = self.reducer.reduceByRow(
-                self.basePossibilities)
+            self.base_possibilities[MODIFIED_ROW] = modification.starting_values
+            reduced_probabilities = self.reducer.reduce_by_row(
+                self.base_possibilities)
 
             # Check that all the expected reductions and only the expected reductions have been made
-            for i in range(len(self.basePossibilities)):
-                if i in modification.modifiedPositions:
+            for i in range(len(self.base_possibilities)):
+                if i in modification.modified_positions:
                     self.assertSetEqual(
-                        reducedProbabilities[MODIFIED_ROW][i], modification.modifiedValues[modification.modifiedPositions.index(i)], self._assertMsg(MODIFIED_ROW, i, modification, reducedProbabilities))
+                        reduced_probabilities[MODIFIED_ROW][i], modification.modified_values[modification.modified_positions.index(i)], self._assert_msg(MODIFIED_ROW, i, modification, reduced_probabilities))
                 else:
                     self.assertSetEqual(
-                        reducedProbabilities[MODIFIED_ROW][i], self.basePossibilities[MODIFIED_ROW][i], self._assertMsg(MODIFIED_ROW, i, modification, reducedProbabilities))
+                        reduced_probabilities[MODIFIED_ROW][i], self.base_possibilities[MODIFIED_ROW][i], self._assert_msg(MODIFIED_ROW, i, modification, reduced_probabilities))
 
     def test_column(self):
         """ Tests that the single value is correctly detected in a column """
         MODIFIED_COLUMN = 2
         for modification in self.tests:
-            for i in range(len(self.basePossibilities)):
-                self.basePossibilities[i][MODIFIED_COLUMN] = modification.startingValues[i]
+            for i in range(len(self.base_possibilities)):
+                self.base_possibilities[i][MODIFIED_COLUMN] = modification.starting_values[i]
 
-            reducedProbabilities = self.reducer.reduceByColumn(
-                self.basePossibilities)
+            reduced_probabilities = self.reducer.reduce_by_column(
+                self.base_possibilities)
 
             # Check that all the expected reductions and only the expected reductions have been made
-            for i in range(len(self.basePossibilities)):
-                if i in modification.modifiedPositions:
+            for i in range(len(self.base_possibilities)):
+                if i in modification.modified_positions:
                     self.assertSetEqual(
-                        reducedProbabilities[i][MODIFIED_COLUMN], modification.modifiedValues[modification.modifiedPositions.index(i)], self._assertMsg(i, MODIFIED_COLUMN, modification, reducedProbabilities))
+                        reduced_probabilities[i][MODIFIED_COLUMN], modification.modified_values[modification.modified_positions.index(i)], self._assert_msg(i, MODIFIED_COLUMN, modification, reduced_probabilities))
                 else:
                     self.assertSetEqual(
-                        reducedProbabilities[i][MODIFIED_COLUMN], self.basePossibilities[i][MODIFIED_COLUMN], self._assertMsg(i, MODIFIED_COLUMN, modification, reducedProbabilities))
+                        reduced_probabilities[i][MODIFIED_COLUMN], self.base_possibilities[i][MODIFIED_COLUMN], self._assert_msg(i, MODIFIED_COLUMN, modification, reduced_probabilities))
 
     def test_square(self):
         """ Tests that the single value is correctly detected in a square """
@@ -262,32 +262,32 @@ class TestForcedPositionsReducer(unittest.TestCase):
 
         for modification in self.tests:
 
-            modficationNumber = 0
+            modfication_number = 0
 
             for i in range(3):
                 for j in range(3):
                     row = ROW_BASE + i
                     column = COLUMN_BASE + j
-                    self.basePossibilities[row][column] = modification.startingValues[modficationNumber]
-                    modficationNumber += 1
+                    self.base_possibilities[row][column] = modification.starting_values[modfication_number]
+                    modfication_number += 1
 
-            reducedProbabilities = self.reducer.reduceBySquare(
-                self.basePossibilities)
+            reduced_probabilities = self.reducer.reduce_by_square(
+                self.base_possibilities)
 
             # Check that all the expected reductions and only the expected reductions have been made
             # modficationNumber and checkNumber are used in the same way
-            checkNumber = 0
+            check_number = 0
             for i in range(3):
                 for j in range(3):
                     row = ROW_BASE + i
                     column = COLUMN_BASE + j
-                    if checkNumber in modification.modifiedPositions:
+                    if check_number in modification.modified_positions:
                         self.assertSetEqual(
-                            reducedProbabilities[row][column], modification.modifiedValues[modification.modifiedPositions.index(checkNumber)], self._assertMsg(row, column, modification, reducedProbabilities))
+                            reduced_probabilities[row][column], modification.modified_values[modification.modified_positions.index(check_number)], self._assert_msg(row, column, modification, reduced_probabilities))
                     else:
                         self.assertSetEqual(
-                            reducedProbabilities[row][column], self.basePossibilities[row][column], self._assertMsg(row, column, modification, reducedProbabilities))
-                    checkNumber += 1
+                            reduced_probabilities[row][column], self.base_possibilities[row][column], self._assert_msg(row, column, modification, reduced_probabilities))
+                    check_number += 1
 
 
 if __name__ == '__main__':

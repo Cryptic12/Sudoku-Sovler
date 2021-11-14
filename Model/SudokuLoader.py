@@ -4,36 +4,36 @@ import os
 class SudokuLoader:
     # Load a Sudoku from a file
 
-    _fileLocation = ""
-    _fileLoaded = False
-    _sudokuBoard = []
+    _file_location = ""
+    _file_loaded = False
+    _sudoku_board = []
 
-    def __init__(self, fileLocation):
-        self._fileLocation = fileLocation
+    def __init__(self, file_location):
+        self._file_location = file_location
 
-    def getFileLocation(self):
-        return self._fileLocation
+    def get_file_location(self):
+        return self._file_location
 
-    def setFileLocation(self, fileLocation):
-        self._fileLocation = fileLocation
+    def set_file_location(self, file_location):
+        self._file_location = file_location
 
-    def loadFile(self):
-        sudokuFile = open(self._fileLocation, "r")
+    def load_file(self):
+        sudoku_file = open(self._file_location, "r")
         board = []
 
-        for line in sudokuFile:
+        for line in sudoku_file:
             board.append(line.rstrip().split(","))
 
-        sudokuFile.close()
+        sudoku_file.close()
 
-        self._sudokuBoard = board
+        self._sudoku_board = board
 
-    def getSudokuBoard(self):
+    def get_sudoku_board(self):
 
-        if not self._fileLoaded:
-            self.loadFile()
+        if not self._file_loaded:
+            self.load_file()
 
-        return self._sudokuBoard
+        return self._sudoku_board
 
 
 def main():

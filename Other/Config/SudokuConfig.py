@@ -3,29 +3,29 @@ from Other.Config.ConfigLoader import ConfigLoader
 
 
 class SudokuConfig:
-    _configParser = ""
+    _config_parser = ""
     _section = ""
-    _fileName = ""
-    _boardSize = 0
-    _squareSize = 0
-    _fieldMapping = [
-        ("_fileName", "FileName", "str"),
-        ("_boardSize", "BoardSize", "int"),
-        ("_squareSize", "SquareSize", "int"),
+    _file_name = ""
+    _board_size = 0
+    _square_size = 0
+    _field_mapping = [
+        ("_file_name", "FileName", "str"),
+        ("_board_size", "BoardSize", "int"),
+        ("_square_size", "SquareSize", "int"),
     ]
 
-    def __init__(self, pathName, section="sudoku"):
+    def __init__(self, path_name, section="sudoku"):
         self._section = section
-        self._configParser = ConfigLoader(pathName)
-        self.parseConfig(self._configParser.getConfig())
+        self._config_parser = ConfigLoader(path_name)
+        self.parse_config(self._config_parser.get_config())
 
-    def parseConfig(self, config):
-        for mapping in self._fieldMapping:
-            fieldName, configName, fieldType = mapping
-            self.__setattr__(fieldName, self.getValue(
-                config[self._section], configName.lower(), fieldType))
+    def parse_config(self, config):
+        for mapping in self._field_mapping:
+            field_name, config_name, field_type = mapping
+            self.__setattr__(field_name, self.get_value(
+                config[self._section], config_name.lower(), field_type))
 
-    def getValue(self, section, field, type):
+    def get_value(self, section, field, type):
         if field not in section:
             return None
 
@@ -40,20 +40,20 @@ class SudokuConfig:
 
         return value
 
-    def getFileName(self):
-        return self._fileName
+    def get_file_name(self):
+        return self._file_name
 
-    def setFileName(self, fileName):
-        self._fileName = fileName
+    def set_file_name(self, file_name):
+        self._file_name = file_name
 
-    def getBoardSize(self):
-        return self._boardSize
+    def get_board_size(self):
+        return self._board_size
 
-    def setBoardSize(self, boardSize):
-        self._boardSize = boardSize
+    def set_board_size(self, board_size):
+        self._board_size = board_size
 
-    def getSquareSize(self):
-        return self._squareSize
+    def get_square_size(self):
+        return self._square_size
 
-    def setSquareSize(self, squareSize):
-        self._squareSize = squareSize
+    def set_square_size(self, square_size):
+        self._square_size = square_size

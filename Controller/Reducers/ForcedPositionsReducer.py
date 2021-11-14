@@ -4,38 +4,37 @@ import math
 class ForcedPositionsReducer():
     """ Identifies sets of positions in a given row/column/square where a subset of values are forced to be placed into """
 
-    def __init__(self, boardSize, squareSize):
-        self.boardSize = boardSize
-        self.squareSize = squareSize
+    def __init__(self, board_size, square_size):
+        self.board_size = board_size
+        self.square_size = square_size
 
     def reduce(self, possibilities):
-        possibilities = self.reduceByRow(possibilities)
-        possibilities = self.reduceByColumn(possibilities)
-        return self.reduceBySquare(possibilities)
+        possibilities = self.reduce_by_row(possibilities)
+        possibilities = self.reduce_by_column(possibilities)
+        return self.reduce_by_square(possibilities)
 
-    def reduceByRow(self, possibilities):
-        for row in range(self.boardSize):
+    def reduce_by_row(self, possibilities):
+        for row in range(self.board_size):
 
             # For each position, count the number of times each value appears
             positions = []
-            for column in range(self.boardSize):
+            for column in range(self.board_size):
 
                 if len(possibilities[row][column]) <= 1:
                     continue
 
                 positions.append((row, column))
 
-            # print(f"Row: {row}")
-            possibilities = reducePositionsOuter(possibilities, positions)
+            possibilities = reduce_positions_outer(possibilities, positions)
 
         return possibilities
 
-    def reduceByColumn(self, possibilities):
-        for column in range(self.boardSize):
+    def reduce_by_column(self, possibilities):
+        for column in range(self.board_size):
 
             # For each position, count the number of times each value appears
             positions = []
-            for row in range(self.boardSize):
+            for row in range(self.board_size):
 
                 if len(possibilities[row][column]) <= 1:
                     continue
@@ -43,69 +42,69 @@ class ForcedPositionsReducer():
                 positions.append((row, column))
 
             # print(f"Column: {column}")
-            possibilities = reducePositionsOuter(possibilities, positions)
+            possibilities = reduce_positions_outer(possibilities, positions)
 
         return possibilities
 
-    def reduceBySquare(self, possibilities):
-        SQUARE_SIZE = self.squareSize
-        SQUARE_COUNT = int(self.boardSize / SQUARE_SIZE) ** 2
+    def reduce_by_square(self, possibilities):
+        SQUARE_SIZE = self.square_size
+        SQUARE_COUNT = int(self.board_size / SQUARE_SIZE) ** 2
 
         for square in range(0, SQUARE_COUNT):
 
-            rowBase = (square % SQUARE_SIZE) * SQUARE_SIZE
-            columnBase = math.floor(square / SQUARE_SIZE) * SQUARE_SIZE
+            ROW_BASE = (square % SQUARE_SIZE) * SQUARE_SIZE
+            COLUMN_BASE = math.floor(square / SQUARE_SIZE) * SQUARE_SIZE
 
             # For each position, count the number of times each value appears
             positions = []
             for x in range(0, SQUARE_SIZE):
-                curRow = rowBase + x
+                cur_row = ROW_BASE + x
                 for y in range(0, SQUARE_SIZE):
-                    curColumn = columnBase + y
+                    cur_column = COLUMN_BASE + y
 
-                    if len(possibilities[curRow][curColumn]) <= 1:
+                    if len(possibilities[cur_row][cur_column]) <= 1:
                         continue
 
-                    positions.append((curRow, curColumn))
+                    positions.append((cur_row, cur_column))
 
             # print(f"Square: {square}")
-            possibilities = reducePositionsOuter(possibilities, positions)
+            possibilities = reduce_positions_outer(possibilities, positions)
 
         return possibilities
 
 
-def reducePositionsOuter(possibilities, positions):
-    valueCounts = calculateValueCounts(possibilities, positions)
+def reduce_positions_outer(possibilities, positions):
+    value_counts = calculate_value_counts(possibilities, positions)
 
-    if len(valueCounts) < 1:
+    if len(value_counts) < 1:
         return possibilities
 
-    return doPermutations(possibilities, positions, valueCounts)
+    return do_permutations(possibilities, positions, value_counts)
 
 
-def calculateValueCounts(possibilities, positions):
-    valueCounts = {}
+def calculate_value_counts(possibilities, positions):
+    value_counts = {}
 
     for position in positions:
         row, column = position
         possibility = possibilities[row][column]
         for value in possibility:
-            count = valueCounts.get(value)
+            count = value_counts.get(value)
             if count == None:
-                valueCounts[value] = 1
+                value_counts[value] = 1
             else:
-                valueCounts[value] = count + 1
+                value_counts[value] = count + 1
 
-    return valueCounts
+    return value_counts
 
 
-def doPermutations(possibilities, positions, valueCounts):
+def do_permutations(possibilities, positions, value_counts):
 
-    valueCountsMin = min(valueCounts.values())
+    VALUE_COUNTS_MIN = min(value_counts.values())
 
     # Check till 2 fewer than the total number of unsolved spaces
-    for i in range(valueCountsMin, len(positions) - 1):
-        permutations = permutationMaker(positions, i)
+    for i in range(VALUE_COUNTS_MIN, len(positions) - 1):
+        permutations = permutation_maker(positions, i)
 
         for permutation in permutations:
             group1 = set()
@@ -127,12 +126,12 @@ def doPermutations(possibilities, positions, valueCounts):
 
             difference = group1.difference(group2)
             if len(difference) == i:
-                print(
-                    f"~~~ {i} ~~~ \n possibilities:")
-                for row in possibilities:
-                    print(row)
-                print(
-                    f"permutations: {permutations} \n permutation: {permutation} \n group1: {group1} \n group2: {group2} \n difference: {difference}")
+                # print(
+                #     f"~~~ {i} ~~~ \n possibilities:")
+                # for row in possibilities:
+                #     print(row)
+                # print(
+                #     f"permutations: {permutations} \n permutation: {permutation} \n group1: {group1} \n group2: {group2} \n difference: {difference}")
                 if type(permutation) is list:
                     for position in permutation:
                         x, y = position
@@ -147,39 +146,40 @@ def doPermutations(possibilities, positions, valueCounts):
 #  TODO Reduce the recursive functions into a single function
 
 
-def permutationMakerRecursive(arr, cnt, result):
+def permutation_maker_recursive(arr, cnt, result):
     # Recursive function to make permutations from a given array
-    arrCpy = arr.copy()
-    toReturn = []
+    arr_cpy = arr.copy()
+    to_return = []
 
     if (cnt == 0):
         return result
 
     for _ in range(0, len(arr)):
-        nextVal = [arrCpy.pop(0)]
-        results = permutationMakerRecursive(arrCpy, cnt - 1, result + nextVal)
+        next_val = [arr_cpy.pop(0)]
+        results = permutation_maker_recursive(
+            arr_cpy, cnt - 1, result + next_val)
         if len(results) > 0:
             if type(results[0]) is list:
-                for curResult in results:
-                    toReturn.append(curResult)
+                for cur_result in results:
+                    to_return.append(cur_result)
             else:
-                toReturn.append(results)
+                to_return.append(results)
 
-    return toReturn
+    return to_return
 
 
-def permutationMaker(arr, cnt):
+def permutation_maker(arr, cnt):
     # Base function of permutations. Makes permutations of cnt length from the values given in arr
-    toReturn = []
-    arrCpy = arr.copy()
+    to_return = []
+    arr_cpy = arr.copy()
 
     for _ in range(0, len(arr)):
-        startingVal = [arrCpy.pop(0)]
-        results = permutationMakerRecursive(arrCpy, cnt - 1, startingVal)
+        starting_val = [arr_cpy.pop(0)]
+        results = permutation_maker_recursive(arr_cpy, cnt - 1, starting_val)
         for result in results:
-            toReturn.append(result)
+            to_return.append(result)
 
-    return toReturn
+    return to_return
 
 
 def main():

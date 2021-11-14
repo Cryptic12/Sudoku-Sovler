@@ -1,87 +1,63 @@
 
 class SudokuController:
 
-    _sudokuModel = None
-    _sudokuRules = None
-    _probabilityReducer = None
+    _sudoku_model = None
+    _sudoku_rules = None
+    _probability_reducer = None
     _solved = False
 
-    def __init__(self, sudokuModel, sudokuRules, probabilityReducer):
+    def __init__(self, model, rules, reducer):
 
-        self._sudokuModel = sudokuModel
-        self._sudokuRules = sudokuRules
-        self._probabilityReducer = probabilityReducer
+        self._sudoku_model = model
+        self._sudoku_rules = rules
+        self._probability_reducer = reducer
 
-    def solveSudoku(self):
+    def solve_sudoku(self):
         if self._solved:
             return
 
-        # print(self._sudokuModel.getBoard())
-        # print("Board", self._sudokuModel.getBoard())
-        self.generatePossibilities()
+        self.generate_possibilities()
+        self.reduce_possibilities()
+        was_updated = self.update_board()
 
-        possibilities = self._sudokuModel.getPossibilities()
-        # print("Base Possibilities")
-        # for row in possibilities:
-        #     print(row)
-        self.reducePossibilities()
+        if was_updated:
+            self.solve_sudoku()
 
-        # print("Probs", self._sudokuModel.getPossibilities())
-        # print()
-        wasUpdated = self.updateBoard()
-
-        if wasUpdated:
-            self.solveSudoku()
-
-    def getIterations(self):
+    def get_iterations(self):
         return self._iterations
 
-    def isSolved(self):
+    def is_solved(self):
         return self._solved
 
-    def generatePossibilities(self):
-        self._sudokuModel.setPossibilities(self._sudokuRules.generatePossibilities(
-            self._sudokuModel.getBoard()))
+    def generate_possibilities(self):
+        self._sudoku_model.set_possibilities(self._sudoku_rules.generate_possibilities(
+            self._sudoku_model.get_board()))
 
-        # board = self._sudokuModel.getBoard()
-        # possibilities = []
-        # for row in board:
-        #     newRow = []
-        #     for column in row:
-        #         if len(column) == 1:
-        #             newRow.append({column})
-        #         else:
-        #             newRow.append(
-        #                 {'1', '2', '3', '4', '5', '6', '7', '8', '9'})
-        #     possibilities.append(newRow.copy())
-        # print(possibilities)
-        # self._sudokuModel.setPossibilities(possibilities)
+    def reduce_possibilities(self):
+        possibilities = self._sudoku_model.get_possibilities()
+        self._sudoku_model.set_possibilities(
+            self._probability_reducer.reduce_possibilities(possibilities))
 
-    def reducePossibilities(self):
-        possibilities = self._sudokuModel.getPossibilities()
-        self._sudokuModel.setPossibilities(
-            self._probabilityReducer.reducePossibilities(possibilities))
-
-    def updateBoard(self):
-        boardModified = False
-        boardSize = self._sudokuModel.getBoardSize()
-        for i in range(boardSize):
-            for j in range(boardSize):
+    def update_board(self):
+        board_modified = False
+        board_size = self._sudoku_model.get_board_size()
+        for i in range(board_size):
+            for j in range(board_size):
                 position = (i, j)
-                if self._sudokuModel.getValue(position) != "":
+                if self._sudoku_model.get_value(position) != "":
                     continue
 
                 probabilites = set(
-                    self._sudokuModel.getPositionPossibilities(position))
+                    self._sudoku_model.get_position_possibilities(position))
 
                 if len(probabilites) > 1:
                     continue
 
                 for value in probabilites:
-                    self._sudokuModel.setValue(position, value)
-                    boardModified = True
+                    self._sudoku_model.set_value(position, value)
+                    board_modified = True
 
-        return boardModified
+        return board_modified
 
 
 def main():

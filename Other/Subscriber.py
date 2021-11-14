@@ -1,22 +1,22 @@
 
 class Subscriber:
-    __notifyFunc = None
-    __subscriberId = None
+    _notify_func = None
+    _subscriber_id = None
 
-    def __init__(self, notifyFunc):
-        self.__notifyFunc = notifyFunc
+    def __init__(self, notify_func):
+        self._notify_func = notify_func
 
     def notify(self, event):
-        self.__notifyFunc(event)
+        self._notify_func(event)
 
-    def setNotifyFunc(self, notifyFunc):
-        self.__notifyFunc = notifyFunc
+    def set_notify_func(self, _notify_func):
+        self._notify_func = _notify_func
 
-    def getNotifyFunc(self):
-        return self.__notifyFunc
+    def get_notify_func(self):
+        return self._notify_func
 
-    def setId(self, id):
-        self.__subscriberId = id
+    def set_id(self, id):
+        self._subscriber_id = id
 
-    def getId(self):
-        return self.__subscriberId
+    def get_id(self):
+        return self._subscriber_id
