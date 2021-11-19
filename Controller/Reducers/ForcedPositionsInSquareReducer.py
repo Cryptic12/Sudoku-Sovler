@@ -1,4 +1,4 @@
-from Controller.Rules.SquareRule import SquareRule
+from Controller.Rules.Rules import SquareRule
 
 
 class ForcedPositionsInSquareReducer():

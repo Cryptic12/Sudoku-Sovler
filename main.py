@@ -16,9 +16,8 @@ from Other.Subscriber import Subscriber
 
 # Rules
 from Controller.Rules.SudokuRules import SudokuRules
-from Controller.Rules.RowRule import RowRule
-from Controller.Rules.ColumnRule import ColumnRule
-from Controller.Rules.SquareRule import SquareRule
+from Controller.Rules.Conditions.Conditions import UniqueCondition
+from Controller.Rules.Rules import RowRule, ColumnRule, SquareRule
 
 # Reducers
 from Controller.Reducers.PossibilitiesReducer import PossibilitiesReducer
@@ -41,8 +40,9 @@ def main():
 
     """ Setup Solver """
     square_rule = SquareRule(
-        sudoku_config.get_square_size())
-    rules = [RowRule(), ColumnRule(), square_rule]
+        sudoku_config.get_square_size(), [UniqueCondition()])
+    rules = [RowRule([UniqueCondition()]), ColumnRule(
+        [UniqueCondition()]), square_rule]
     sudoku_rules = SudokuRules(rules)
 
     """ Setup Reducer """
