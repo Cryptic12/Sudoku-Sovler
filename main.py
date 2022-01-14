@@ -21,9 +21,7 @@ from Controller.Rules.Rules import RowRule, ColumnRule, SquareRule
 
 # Reducers
 from Controller.Reducers.PossibilitiesReducer import PossibilitiesReducer
-from Controller.Reducers.OnePositionReducer import OnePositionReducer
-from Controller.Reducers.ForcedPositionsReducer import ForcedPositionsReducer
-from Controller.Reducers.ForcedPositionsInSquareReducer import ForcedPositionsInSquareReducer
+from Controller.Reducers.Reducers import OnePositionReducer, ForcedPositionsReducer, ForcedPositionsInSquareReducer
 
 
 def main():
@@ -39,16 +37,26 @@ def main():
                                sudoku_config.get_board_size(), sudoku_config.get_square_size())
 
     """ Setup Solver """
-    square_rule = SquareRule(
-        sudoku_config.get_square_size(), [UniqueCondition()])
-    rules = [RowRule([UniqueCondition()]), ColumnRule(
-        [UniqueCondition()]), square_rule]
-    sudoku_rules = SudokuRules(rules)
+    unique_condition = UniqueCondition()
+
+    ROW_RULE = RowRule([unique_condition])
+    COLUMN_RULE = ColumnRule(
+        [unique_condition])
+    SQUARE_RULE = SquareRule(
+        sudoku_config.get_square_size(), [unique_condition])
+    ALL_RULES = [ROW_RULE, COLUMN_RULE, SQUARE_RULE]
+    sudoku_rules = SudokuRules(ALL_RULES)
 
     """ Setup Reducer """
-    reducers = [OnePositionReducer(
-        sudoku_config.get_board_size(), sudoku_config.get_square_size(), rules), ForcedPositionsReducer(sudoku_config.get_board_size(), sudoku_config.get_square_size()),
-        ForcedPositionsInSquareReducer(square_rule)]
+    reducers = []
+
+    reducers.append(OnePositionReducer(
+        sudoku_config.get_board_size(), sudoku_config.get_square_size(), ALL_RULES))
+    reducers.append(ForcedPositionsReducer(
+        sudoku_config.get_board_size(), sudoku_config.get_square_size(), ALL_RULES))
+    reducers.append(ForcedPositionsInSquareReducer(
+        SQUARE_RULE, [ROW_RULE, COLUMN_RULE]))
+
     possibilities_reducer = PossibilitiesReducer(reducers)
 
     sudoku_controller = SudokuController(

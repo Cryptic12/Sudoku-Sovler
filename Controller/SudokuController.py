@@ -5,6 +5,7 @@ class SudokuController:
     _sudoku_rules = None
     _probability_reducer = None
     _solved = False
+    _possibilities_initialized = False
 
     def __init__(self, model, rules, reducer):
 
@@ -16,7 +17,9 @@ class SudokuController:
         if self._solved:
             return
 
-        self.generate_possibilities()
+        if not self._possibilities_initialized:
+            self.generate_possibilities()
+
         self.reduce_possibilities()
         was_updated = self.update_board()
 
