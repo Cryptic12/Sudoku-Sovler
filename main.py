@@ -27,14 +27,16 @@ from Controller.Reducers.Reducers import OnePositionReducer, ForcedPositionsRedu
 def main():
     """ Load the config"""
     CONFIG_PATH = os.path.join(os.getcwd(), 'config.cfg')
-
     sudoku_config = SudokuConfig(CONFIG_PATH)
-    sudoku_loader = SudokuLoader(os.path.join(
-        os.getcwd(), sudoku_config.get_file_name()))
 
     """ Setup Model """
-    sudoku_model = SudokuModel(sudoku_loader.get_sudoku_board(),
-                               sudoku_config.get_board_size(), sudoku_config.get_square_size())
+    sudoku_model = SudokuModel(
+        sudoku_config.get_board_size(), sudoku_config.get_square_size())
+
+    if sudoku_config.get_file_name():
+        sudoku_loader = SudokuLoader(os.path.join(
+            os.getcwd(), sudoku_config.get_file_name()))
+        sudoku_model.load_board(sudoku_loader.get_sudoku_board())
 
     """ Setup Solver """
     unique_condition = UniqueCondition()

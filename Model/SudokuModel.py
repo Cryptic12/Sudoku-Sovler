@@ -15,15 +15,13 @@ class SudokuModel:
     _subscriber_ids = set()
     _max_subs = 100
 
-    def __init__(self, board=None, board_size=9, square_size=3):
+    def __init__(self, board_size=9, square_size=3):
 
         self._board_size = board_size
         self._square_size = square_size
+        self.init_empty_board()
 
-        if board is None:
-            self.init_empty_board()
-            return
-
+    def load_board(self, board):
         self.verify_board(board)
         self._board = board
 

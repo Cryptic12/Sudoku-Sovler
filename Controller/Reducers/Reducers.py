@@ -232,15 +232,18 @@ class ForcedPositionsReducer(Reducer):
 
             for permutation in permutations:
                 permutation_set = set()
+                position_sizes = set()
                 other_set = set()
 
-                for position in permutation:
+                for i, position in enumerate(permutation):
                     row, column = position
-                    if permutation_set:
+                    if i > 0:
                         permutation_set.intersection_update(
                             possibilities[row][column])
                     else:
                         permutation_set.update(possibilities[row][column])
+
+                    position_sizes.add(len(possibilities[row][column]))
 
                 other_positions = set(
                     position for position in positions if position not in permutation)
@@ -260,6 +263,11 @@ class ForcedPositionsReducer(Reducer):
                         if len(possibilities[row][column].intersection(difference)) > 0:
                             possibilities = self.udpate_position(
                                 possibilities, position, possibilities[row][column].intersection(difference))
+                elif len(position_sizes) == 1 and len(permutation_set) == permutation_size and next(iter(position_sizes)) == permutation_size:
+                    for position in other_positions:
+                        row, column = position
+                        possibilities = self.udpate_position(
+                            possibilities, position, possibilities[row][column].difference(permutation_set))
 
         return possibilities
 
