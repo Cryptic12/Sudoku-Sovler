@@ -1,3 +1,4 @@
+from ast import Pass
 import math
 from typing import Set
 
@@ -23,7 +24,9 @@ class SudokuModel:
 
     def load_board(self, board):
         self.verify_board(board)
-        self._board = board
+        for row in range(0, self._board_size):
+            for column in range(0, self._board_size):
+                self.set_value((row, column), board[row][column])
 
     def verify_board(self, board):
 
@@ -39,11 +42,11 @@ class SudokuModel:
     def init_empty_board(self):
         board = []
         row = []
-        for i in range(0, self._board_size):
+        for _ in range(0, self._board_size):
             row.append('')
 
-        for i in range(0, self._board_size):
-            board.append(row)
+        for _ in range(0, self._board_size):
+            board.append(row.copy())
 
         self._board = board
 
@@ -113,6 +116,7 @@ class SudokuModel:
         event = {"event": SudokuEvents.VALUE_UPDATE,
                  "position": position,
                  "value": value}
+
         self._notify(event)
 
     def get_possibilities(self):
@@ -130,18 +134,9 @@ class SudokuModel:
         self._possibilities[row][column] = possibility
 
 
-def test_func():
-    print("I have been notified")
+def main():
+    pass
 
 
 if __name__ == '__main__':
-    sudoku = SudokuModel()
-    subscriber = Subscriber(test_func)
-
-    subscriber = sudoku.subscribe(subscriber)
-
-    print(sudoku.get_board())
-
-    sudoku.notify()
-    print(sudoku.unsubscribe(subscriber.get_id()))
-    sudoku.notify()
+    main()

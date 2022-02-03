@@ -115,3 +115,11 @@ class SquareRule(Rule):
 
     def _base_calculator(self, base):
         return math.floor(base / self.square_size) * self.square_size
+
+
+def main():
+    pass
+
+
+if __name__ == '__main__':
+    main()

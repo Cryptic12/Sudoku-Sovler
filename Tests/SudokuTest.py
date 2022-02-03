@@ -9,5 +9,12 @@ class SudokuTest():
     modified_values = The values we expect the changed positions to contain
     """
     starting_values: list
-    modified_positions: list
-    modified_values: list
+    reductions: dict
+
+
+def main():
+    pass
+
+
+if __name__ == '__main__':
+    main()

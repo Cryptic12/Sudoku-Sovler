@@ -62,11 +62,11 @@ def main():
     possibilities_reducer = PossibilitiesReducer(reducers)
 
     sudoku_controller = SudokuController(
-        sudoku_model, sudoku_rules, possibilities_reducer)
+        sudoku_model, sudoku_loader, sudoku_rules, possibilities_reducer)
 
     """ Setup Display """
     sudoku_view = SudokuDisplay(
-        sudoku_controller.solve_sudoku)
+        sudoku_controller.solve_sudoku, sudoku_controller.reset_board)
     sudoku_view.load_board(sudoku_model.get_board())
 
     sudoku_view_subscriber = Subscriber(sudoku_view.update)
@@ -74,7 +74,7 @@ def main():
 
     sudoku_view.start_display()
 
-    print("Sudoku Solver Completed")
+    print("Exiting")
 
 
 if __name__ == '__main__':

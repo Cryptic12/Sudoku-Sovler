@@ -20,3 +20,11 @@ class Subscriber:
 
     def get_id(self):
         return self._subscriber_id
+
+
+def main():
+    pass
+
+
+if __name__ == '__main__':
+    main()

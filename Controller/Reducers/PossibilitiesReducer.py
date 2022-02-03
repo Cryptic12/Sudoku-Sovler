@@ -9,24 +9,13 @@ class PossibilitiesReducer():
         self._reducers.append(reducer)
 
     def reduce_possibilities(self, possibilities):
-        count = self._count_total_possibilities(possibilities)
-        continue_reducing = True
-        for row in possibilities:
-            print(row)
 
-        while continue_reducing:
-            for reducer in self._reducers:
-                possibilities = reducer.reduce(possibilities)
-                print(reducer)
-                for row in possibilities:
-                    print(row)
-            count_after_reducers = self._count_total_possibilities(
-                possibilities)
-            if count_after_reducers >= count:
-                continue_reducing = False
-            count = count_after_reducers
+        reductions = []
+        for reducer in self._reducers:
+            reduction = reducer.reduce(possibilities)
+            reductions.extend(reduction)
 
-        return possibilities
+        return reductions
 
     def _count_total_possibilities(self, possibilities):
         total = 0
@@ -34,3 +23,11 @@ class PossibilitiesReducer():
             for position in row:
                 total += len(position)
         return total
+
+
+def main():
+    pass
+
+
+if __name__ == '__main__':
+    main()

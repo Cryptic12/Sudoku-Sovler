@@ -1,6 +1,12 @@
+
 from tkinter import *
 from tkinter import ttk
+from tkinter.font import Font
+
 import math
+import queue
+from threading import Timer
+
 
 from Model.SudokuEvents import SudokuEvents
 
@@ -9,9 +15,14 @@ class SudokuDisplay:
 
     sudoku_values = dict()
 
-    def __init__(self, start_func):
+    def __init__(self, start_func, reset_func, solve_delay=1):
         self.square_size = 3
         self.start_func = start_func
+        self.reset_func = reset_func
+        self.stepped_solved = False
+        self.update_queue = queue.SimpleQueue()
+        self.queue_processing = False
+        self.solve_delay = solve_delay
         self.window = Tk()
         self.setup_display()
 
@@ -19,20 +30,45 @@ class SudokuDisplay:
         self.window.title("My Sudoku App!")
         self.window.geometry('330x400')
 
-        sudoku_board = Frame()
-        sudoku_board.grid(column=0, row=0, padx=20, pady=20)
+        self.position_font = Font(
+            family="Arial", size=16, weight="bold")
+
+        sudoku_board = Frame(borderwidth=1, relief="solid")
+        sudoku_board.grid(row=0, column=0, padx=20, pady=20)
 
         for square in range(9):
             row = square % self.square_size
             column = math.floor(square / self.square_size)
             self.create_square(sudoku_board, square, row, column)
 
-        solve_button = Button(self.window, text="Solve",
-                              command=self.start_func)
-        solve_button.grid(column=0, row=1)
+        sudoku_buttons = Frame()
+        sudoku_buttons.grid(row=1, column=0)
+
+        solve_button = Button(sudoku_buttons, text="Solve",
+                              command=self.start_normal)
+        solve_button.grid(row=0, column=0, padx=2)
+
+        solve_slow_button = Button(sudoku_buttons, text="Solve (Slowly)",
+                                   command=self.start_slow)
+        solve_slow_button.grid(row=0, column=1, padx=2)
+
+        reset_button = Button(sudoku_buttons, text="Reset",
+                              command=self.reset)
+        reset_button.grid(row=0, column=2, padx=2)
 
     def start_display(self):
         self.window.mainloop()
+
+    def start_normal(self):
+        self.stepped_solved = False
+        self.start_func()
+
+    def start_slow(self):
+        self.stepped_solved = True
+        self.start_func()
+
+    def reset(self):
+        self.reset_func()
 
     def load_board(self, sudoku_board):
         BOARD_SIZE = len(sudoku_board)
@@ -56,18 +92,39 @@ class SudokuDisplay:
                 sudoku_square, row, column, value_co_ords)
 
     def create_position(self, parent, row, column, value_co_ords):
+
         sudoku_value = ttk.Label(
-            parent, text=value_co_ords, borderwidth=2, relief="solid")
-        sudoku_value.grid(column=column, row=row, padx=5, pady=5)
+            parent, width=2, text=value_co_ords, anchor="center", borderwidth=2, relief="solid")
+        sudoku_value.configure(font=self.position_font)
+        sudoku_value.grid(column=column, row=row)
 
         return sudoku_value
 
     def update(self, event):
-        # print("Recieved event", event)
-
         if event["event"] == SudokuEvents.VALUE_UPDATE:
+            if self.stepped_solved:
+                self.update_queue.put(event)
+                if not self.queue_processing:
+                    self.process_queue()
+            else:
+                x, y, = event["position"]
+                self.update_position(x, y, event["value"])
+
+    def process_queue(self):
+        if not self.queue_processing:
+            self.queue_processing = True
+            t = Timer(self.solve_delay, self.process_queue)
+            t.start()
+        else:
+            event = self.update_queue.get()
             x, y, = event["position"]
             self.update_position(x, y, event["value"])
+
+            if self.update_queue.empty():
+                self.queue_processing = False
+            else:
+                t = Timer(self.solve_delay, self.process_queue)
+                t.start()
 
     def update_position(self, x, y, value):
         if value == "":

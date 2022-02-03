@@ -6,34 +6,25 @@ class Reducer():
     def __init__(self, rules):
         self.rules = rules
 
-    def udpate_position(self, possibilities, position, values):
-        x, y = position
-        possibilities[x][y] = values
-        solved_positions = []
+    def reduce_reductions(self, reductions):
+        reduced_reductions = dict()
 
-        if len(values) == 1:
-            value = next(iter(values))
-            for rule in self.rules:
-                affeceted_positions = rule.get_affected_positions(position)
-                for affeceted_position in affeceted_positions:
-                    affeceted_position_row, affeceted_position_column = affeceted_position
+        for reduction in reductions:
+            position, possibilities = reduction
+            # row, column = position
 
-                    if affeceted_position_row == x and affeceted_position_column == y:
-                        continue
+            if len(possibilities) > 0:
+                if position in reduced_reductions:
+                    reduced_reductions[position] = reduced_reductions[position].intersection(
+                        possibilities)
+                else:
+                    reduced_reductions[position] = possibilities
 
-                    possibility = possibilities[affeceted_position_row][affeceted_position_column]
-                    if value in possibility and len(possibility) > 1:
-                        possibility.remove(value)
-                        possibilities[affeceted_position_row][affeceted_position_column] = possibility
-                        if len(possibility) == 1:
-                            solved_positions.append(affeceted_position)
+        to_return = []
+        for position in reduced_reductions:
+            to_return.append((position, reduced_reductions[position]))
 
-        for solved_position in solved_positions:
-            solved_position_row, solved_position_column = solved_position
-            possibilities = self.udpate_position(
-                possibilities, solved_position, possibilities[solved_position_row][solved_position_column])
-
-        return possibilities
+        return to_return
 
 
 class OnePositionReducer(Reducer):
@@ -65,16 +56,17 @@ class OnePositionReducer(Reducer):
         return single_values
 
     def reduce(self, possibilities):
+        reductions = []
 
         for rule in self.rules:
-            possibilities = self.generic_reduce(
-                possibilities, rule.get_all_positions())
+            reductions.extend(self.generic_reduce(
+                possibilities, rule.get_all_positions()))
 
-        return possibilities
+        return self.reduce_reductions(reductions)
 
     def generic_reduce(self, possibilities, groups):
 
-        changes = []
+        reductions = []
 
         for group in groups:
 
@@ -94,10 +86,9 @@ class OnePositionReducer(Reducer):
                 row, column = position
                 for value in single_values:
                     if value in possibilities[row][column] and len(possibilities[row][column]) > 1:
-                        possibilities = self.udpate_position(
-                            possibilities, position, set(value))
+                        reductions.append((position, set(value)))
 
-        return possibilities
+        return self.reduce_reductions(reductions)
 
 
 class ForcedPositionsInSquareReducer(Reducer):
@@ -110,15 +101,14 @@ class ForcedPositionsInSquareReducer(Reducer):
         self.square_rule = square_rule
 
     def reduce(self, possibilities):
+        reductions = []
+
         for rule in self.rules:
 
-            possibilities = self.generic_reduce(
-                possibilities, rule.get_all_positions())
-            print(f"Running rule {rule}")
-            for row in possibilities:
-                print(row)
+            reductions.extend(self.generic_reduce(
+                possibilities, rule.get_all_positions()))
 
-        return possibilities
+        return self.reduce_reductions(reductions)
 
     def generic_reduce(self, possibilities, groups):
 
@@ -127,6 +117,8 @@ class ForcedPositionsInSquareReducer(Reducer):
 
         for value in range(0, POSSIBILITIES_SIZE):
             possible_values.append(str(value + 1))
+
+        reductions = []
 
         for group in groups:
 
@@ -159,10 +151,10 @@ class ForcedPositionsInSquareReducer(Reducer):
                         position_possibilities = possibilities[row][column].copy(
                         )
                         position_possibilities.remove(value)
-                        possibilities = self.udpate_position(
-                            possibilities, position, position_possibilities)
 
-        return possibilities
+                        reductions.append((position, position_possibilities))
+
+        return self.reduce_reductions(reductions)
 
 
 class ForcedPositionsReducer(Reducer):
@@ -175,13 +167,16 @@ class ForcedPositionsReducer(Reducer):
 
     def reduce(self, possibilities):
 
-        for rule in self.rules:
-            possibilities = self.generic_reduce(
-                possibilities, rule.get_all_positions())
+        reductions = []
 
-        return possibilities
+        for rule in self.rules:
+            reductions.extend(self.generic_reduce(
+                possibilities, rule.get_all_positions()))
+
+        return self.reduce_reductions(reductions)
 
     def generic_reduce(self, possibilities, groups):
+        reductions = []
         for group in groups:
 
             # For each position, count the number of times each value appears
@@ -194,16 +189,16 @@ class ForcedPositionsReducer(Reducer):
 
                 positions.append(position)
 
-            possibilities = self.reduce_positions_outer(
-                possibilities, positions)
+            reductions.extend(self.reduce_positions_outer(
+                possibilities, positions))
 
-        return possibilities
+        return self.reduce_reductions(reductions)
 
     def reduce_positions_outer(self, possibilities, positions):
         value_counts = self.calculate_value_counts(possibilities, positions)
 
         if len(value_counts) < 1:
-            return possibilities
+            return []
 
         return self.do_permutations(possibilities, positions, value_counts)
 
@@ -224,6 +219,7 @@ class ForcedPositionsReducer(Reducer):
     def do_permutations(self, possibilities, positions, value_counts):
 
         VALUE_COUNTS_MIN = min(value_counts.values())
+        reductions = []
 
         # Check till 2 fewer than the total number of unsolved spaces
         for permutation_size in range(VALUE_COUNTS_MIN, len(positions) - 1):
@@ -260,16 +256,17 @@ class ForcedPositionsReducer(Reducer):
                 if len(difference) == permutation_size:
                     for position in permutation:
                         row, column = position
-                        if len(possibilities[row][column].intersection(difference)) > 0:
-                            possibilities = self.udpate_position(
-                                possibilities, position, possibilities[row][column].intersection(difference))
+                        if len(possibilities[row][column]) > len(possibilities[row][column].intersection(difference)) > 0:
+                            reductions.append(
+                                (position, possibilities[row][column].intersection(difference)))
                 elif len(position_sizes) == 1 and len(permutation_set) == permutation_size and next(iter(position_sizes)) == permutation_size:
                     for position in other_positions:
                         row, column = position
-                        possibilities = self.udpate_position(
-                            possibilities, position, possibilities[row][column].difference(permutation_set))
+                        if len(possibilities[row][column].difference(permutation_set)) < len(possibilities[row][column]):
+                            reductions.append(
+                                (position, possibilities[row][column].difference(permutation_set)))
 
-        return possibilities
+        return reductions
 
 
 def permutation_maker(arr, cnt, result=[]):
@@ -283,3 +280,11 @@ def permutation_maker(arr, cnt, result=[]):
             arr[i + 1:], cnt - 1, [*result, value]))
 
     return to_return
+
+
+def main():
+    pass
+
+
+if __name__ == '__main__':
+    main()

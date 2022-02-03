@@ -57,3 +57,11 @@ class SudokuConfig:
 
     def set_square_size(self, square_size):
         self._square_size = square_size
+
+
+def main():
+    pass
+
+
+if __name__ == '__main__':
+    main()

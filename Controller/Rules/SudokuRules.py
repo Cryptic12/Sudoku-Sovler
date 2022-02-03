@@ -66,3 +66,11 @@ class SudokuRules():
             positions = positions.union(
                 rule.get_affected_positions(position))
         return positions
+
+
+def main():
+    pass
+
+
+if __name__ == '__main__':
+    main()
