@@ -12,7 +12,7 @@ CONDITIONS = [UniqueCondition()]
 class TestRowRule(unittest.TestCase):
 
     def setUp(self):
-        self.reducer = RowRule(CONDITIONS)
+        self.reducer = RowRule(BOARD_SIZE, CONDITIONS)
 
     def test_get_positions(self):
         test_row = self.reducer.get_positions(0)
@@ -62,7 +62,7 @@ class TestRowRule(unittest.TestCase):
 class TestColumnRule(unittest.TestCase):
 
     def setUp(self):
-        self.reducer = ColumnRule(CONDITIONS)
+        self.reducer = ColumnRule(BOARD_SIZE, CONDITIONS)
 
     def test_get_positions(self):
         test_column = self.reducer.get_positions(0)
@@ -113,7 +113,7 @@ class TestColumnRule(unittest.TestCase):
 class TestSquareRule(unittest.TestCase):
 
     def setUp(self):
-        self.reducer = SquareRule(SQUARE_SIZE, CONDITIONS)
+        self.reducer = SquareRule(BOARD_SIZE, SQUARE_SIZE, CONDITIONS)
 
     def test_get_positions(self):
         test_square = self.reducer.get_positions(0)

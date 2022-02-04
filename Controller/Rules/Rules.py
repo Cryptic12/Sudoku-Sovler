@@ -39,17 +39,20 @@ class Rule(ABC):
 
 
 class RowRule(Rule):
+    def __init__(self, board_size, conditions):
+        self.board_size = board_size
+        super().__init__(conditions)
 
     def get_positions(self, row: int):
         positions = []
-        for column in range(9):
+        for column in range(self.board_size):
             positions.append((row, column))
 
         return positions
 
     def get_all_positions(self):
         rows = []
-        for row in range(9):
+        for row in range(self.board_size):
             rows.append(self.get_positions(row))
         return rows
 
@@ -62,15 +65,19 @@ class RowRule(Rule):
 
 class ColumnRule(Rule):
 
+    def __init__(self, board_size, conditions):
+        self.board_size = board_size
+        super().__init__(conditions)
+
     def get_positions(self, column: int):
         positions = []
-        for row in range(9):
+        for row in range(self.board_size):
             positions.append((row, column))
         return positions
 
     def get_all_positions(self):
         columns = []
-        for column in range(9):
+        for column in range(self.board_size):
             columns.append(self.get_positions(column))
         return columns
 
@@ -83,9 +90,8 @@ class ColumnRule(Rule):
 
 class SquareRule(Rule):
 
-    square_size = 3
-
-    def __init__(self, square_size, conditions):
+    def __init__(self, board_size, square_size, conditions):
+        self.board_size = board_size
         self.square_size = square_size
         super().__init__(conditions)
 

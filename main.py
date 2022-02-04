@@ -41,11 +41,11 @@ def main():
     """ Setup Solver """
     unique_condition = UniqueCondition()
 
-    ROW_RULE = RowRule([unique_condition])
-    COLUMN_RULE = ColumnRule(
-        [unique_condition])
-    SQUARE_RULE = SquareRule(
-        sudoku_config.get_square_size(), [unique_condition])
+    ROW_RULE = RowRule(sudoku_config.get_board_size(), [unique_condition])
+    COLUMN_RULE = ColumnRule(sudoku_config.get_board_size(),
+                             [unique_condition])
+    SQUARE_RULE = SquareRule(sudoku_config.get_board_size(),
+                             sudoku_config.get_square_size(), [unique_condition])
     ALL_RULES = [ROW_RULE, COLUMN_RULE, SQUARE_RULE]
     sudoku_rules = SudokuRules(ALL_RULES)
 
@@ -66,7 +66,7 @@ def main():
 
     """ Setup Display """
     sudoku_view = SudokuDisplay(
-        sudoku_controller.solve_sudoku, sudoku_controller.reset_board)
+        sudoku_config.get_square_size(), sudoku_controller.solve_sudoku, sudoku_controller.reset_board)
     sudoku_view.load_board(sudoku_model.get_board())
 
     sudoku_view_subscriber = Subscriber(sudoku_view.update)

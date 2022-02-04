@@ -1,6 +1,8 @@
 
 from tkinter import *
 from tkinter import ttk
+from tkinter import messagebox
+from tkinter.dialog import DIALOG_ICON
 from tkinter.font import Font
 
 import math
@@ -14,21 +16,28 @@ from Model.SudokuEvents import SudokuEvents
 class SudokuDisplay:
 
     sudoku_values = dict()
+    buttons = []
 
-    def __init__(self, start_func, reset_func, solve_delay=1):
-        self.square_size = 3
+    def __init__(self, square_size, start_func, reset_func, solve_delay=1):
+
+        self.square_size = square_size
         self.start_func = start_func
         self.reset_func = reset_func
+
+        # State for stepped solving
         self.stepped_solved = False
-        self.update_queue = queue.SimpleQueue()
         self.queue_processing = False
+        self.update_queue = queue.SimpleQueue()
         self.solve_delay = solve_delay
+
+        # Initiate display
         self.window = Tk()
         self.setup_display()
 
     def setup_display(self):
         self.window.title("My Sudoku App!")
-        self.window.geometry('330x400')
+        self.window.geometry('310x360')
+        self.window.resizable(0, 0)
 
         self.position_font = Font(
             family="Arial", size=16, weight="bold")
@@ -56,18 +65,39 @@ class SudokuDisplay:
                               command=self.reset)
         reset_button.grid(row=0, column=2, padx=2)
 
+        self.buttons = [solve_button, solve_slow_button, reset_button]
+
     def start_display(self):
         self.window.mainloop()
 
     def start_normal(self):
-        self.stepped_solved = False
-        self.start_func()
+        for button in self.buttons:
+            button.configure(state=DISABLED)
+        self.was_solved = self.start_func()
+        self.sudoku_completed()
 
     def start_slow(self):
         self.stepped_solved = True
-        self.start_func()
+        for button in self.buttons:
+            button.configure(state=DISABLED)
+        self.was_solved = self.start_func()
+        self.process_queue()
+
+    def sudoku_completed(self):
+        for button in self.buttons:
+            button.configure(state=ACTIVE)
+
+        message = ""
+        if (self.was_solved):
+            message = "Sudoku Solved!"
+        else:
+            message = "Sudoku Not Solved :("
+
+        messagebox.showinfo(title=None, message=message)
 
     def reset(self):
+        self.stepped_solved = False
+        self.was_solved = False
         self.reset_func()
 
     def load_board(self, sudoku_board):
@@ -104,8 +134,6 @@ class SudokuDisplay:
         if event["event"] == SudokuEvents.VALUE_UPDATE:
             if self.stepped_solved:
                 self.update_queue.put(event)
-                if not self.queue_processing:
-                    self.process_queue()
             else:
                 x, y, = event["position"]
                 self.update_position(x, y, event["value"])
@@ -122,6 +150,7 @@ class SudokuDisplay:
 
             if self.update_queue.empty():
                 self.queue_processing = False
+                self.sudoku_completed()
             else:
                 t = Timer(self.solve_delay, self.process_queue)
                 t.start()

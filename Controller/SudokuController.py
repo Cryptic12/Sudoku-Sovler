@@ -53,6 +53,8 @@ class SudokuController:
             if possibilites_total < prev_possibilites_total:
                 prev_possibilites_total = possibilites_total
 
+        return self._solved
+
     def get_iterations(self):
         return self._iterations
 
