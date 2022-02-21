@@ -13,6 +13,7 @@ class Rule(ABC):
     def __init__(self, conditions):
         self.conditions = conditions
 
+    # Check if the given value is allowed based on the rules conditions
     def is_allowed(self, board, value, position):
         positions_to_check = []
         for position in self.get_affected_positions(position):
@@ -25,14 +26,17 @@ class Rule(ABC):
 
         return True
 
+    # Returns the given subset of positions from the sudoku
     @abstractmethod
-    def get_positions(self, row: int):
+    def get_positions(self, subset):
         ...
 
+    # Returns each of the subsets of positions from the sudoku
     @abstractmethod
     def get_all_positions(self):
         ...
 
+    # Returns other positions the belong to the same subset as the given position
     @abstractmethod
     def get_affected_positions(self, position):
         ...
@@ -43,7 +47,7 @@ class RowRule(Rule):
         self.board_size = board_size
         super().__init__(conditions)
 
-    def get_positions(self, row: int):
+    def get_positions(self, row):
         positions = []
         for column in range(self.board_size):
             positions.append((row, column))
@@ -69,7 +73,7 @@ class ColumnRule(Rule):
         self.board_size = board_size
         super().__init__(conditions)
 
-    def get_positions(self, column: int):
+    def get_positions(self, column):
         positions = []
         for row in range(self.board_size):
             positions.append((row, column))
@@ -95,7 +99,7 @@ class SquareRule(Rule):
         self.square_size = square_size
         super().__init__(conditions)
 
-    def get_positions(self, square: int):
+    def get_positions(self, square):
         positions = []
         ROW_BASE = math.floor(square / self.square_size) * self.square_size
         COLUMN_BASE = (square % self.square_size) * self.square_size
@@ -113,7 +117,7 @@ class SquareRule(Rule):
 
     def get_affected_positions(self, position):
         ROW, COLUMN = position
-        square = math.floor(ROW / self.square_size) * 3 + \
+        square = math.floor(ROW / self.square_size) * self.square_size + \
             math.floor(COLUMN / self.square_size)
         affected_positions = set(self.get_positions(square))
         affected_positions.remove(position)

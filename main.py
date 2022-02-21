@@ -36,7 +36,6 @@ def main():
     if sudoku_config.get_file_name():
         sudoku_loader = SudokuLoader(os.path.join(
             os.getcwd(), sudoku_config.get_file_name()))
-        sudoku_model.load_board(sudoku_loader.get_sudoku_board())
 
     """ Setup Solver """
     unique_condition = UniqueCondition()
@@ -50,28 +49,29 @@ def main():
     sudoku_rules = SudokuRules(ALL_RULES)
 
     """ Setup Reducer """
-    reducers = []
+    REDUCERS = []
 
-    reducers.append(OnePositionReducer(
+    REDUCERS.append(OnePositionReducer(
         sudoku_config.get_board_size(), sudoku_config.get_square_size(), ALL_RULES))
-    reducers.append(ForcedPositionsReducer(
+    REDUCERS.append(ForcedPositionsReducer(
         sudoku_config.get_board_size(), sudoku_config.get_square_size(), ALL_RULES))
-    reducers.append(ForcedPositionsInSquareReducer(
+    REDUCERS.append(ForcedPositionsInSquareReducer(
         SQUARE_RULE, [ROW_RULE, COLUMN_RULE]))
 
-    possibilities_reducer = PossibilitiesReducer(reducers)
+    possibilities_reducer = PossibilitiesReducer(REDUCERS)
 
+    """ Setup Controller """
     sudoku_controller = SudokuController(
         sudoku_model, sudoku_loader, sudoku_rules, possibilities_reducer)
 
     """ Setup Display """
     sudoku_view = SudokuDisplay(
         sudoku_config.get_square_size(), sudoku_controller.solve_sudoku, sudoku_controller.reset_board)
-    sudoku_view.load_board(sudoku_model.get_board())
 
     sudoku_view_subscriber = Subscriber(sudoku_view.update)
     sudoku_model.subscribe(sudoku_view_subscriber)
 
+    sudoku_controller.reset_board()
     sudoku_view.start_display()
 
     print("Exiting")

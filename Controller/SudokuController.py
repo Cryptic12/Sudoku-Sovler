@@ -21,9 +21,10 @@ class SudokuController:
         self._sudoku_rules = rules
         self._probability_reducer = reducer
 
+    # Solves the sudoku
     def solve_sudoku(self):
         if self._solved or not self._solvable:
-            return
+            return self._solved
 
         BOARD_SIZE = self._sudoku_model.get_board_size()
         target_possibilities_total = BOARD_SIZE * BOARD_SIZE
@@ -55,21 +56,26 @@ class SudokuController:
 
         return self._solved
 
+    # Returns the number of iterations taken to take the sudoku to its current state
     def get_iterations(self):
         return self._iterations
 
+    # Returns whether the sudoku was able to be solved
     def is_solved(self):
         return self._solved
 
+    # Gets the base possibilities and stores into the model
     def generate_possibilities(self):
         possibilities = self._sudoku_rules.generate_possibilities(
             self._sudoku_model.get_board())
         self._sudoku_model.set_possibilities(possibilities)
 
+    # Returns a list of reductions that can be made to the possibilities
     def get_reductions(self):
         return self._probability_reducer.reduce_possibilities(
             self._sudoku_model.get_possibilities())
 
+    # Applies the reductions to the possibilities. Returns the number of positions that were solved by the reductions
     def reduce_possibilities(self, reductions):
 
         positions_solved = 0
@@ -88,6 +94,7 @@ class SudokuController:
 
         return positions_solved
 
+    # Checks if any unsolved positions can be solved (only 1 possibility available for a position)
     def update_board(self):
         board_modified = False
         BOARD_SIZE = self._sudoku_model.get_board_size()
@@ -111,6 +118,7 @@ class SudokuController:
 
         return board_modified
 
+    # Counts the total number of possibilities across all positions
     def count_possibilities(self):
         total = 0
         BOARD_SIZE = self._sudoku_model.get_board_size()
@@ -122,6 +130,7 @@ class SudokuController:
 
         return total
 
+    # Resets the board to the original state
     def reset_board(self):
         self._solved = False
         self._solvable = True

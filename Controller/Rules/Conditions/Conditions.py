@@ -1,5 +1,7 @@
 from typing import List
 
+# No duplication allowed
+
 
 class UniqueCondition():
 

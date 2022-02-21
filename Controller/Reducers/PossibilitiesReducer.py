@@ -5,9 +5,11 @@ class PossibilitiesReducer():
     def __init__(self, reducers):
         self._reducers = reducers
 
+    # Add a reducer
     def add_reducer(self, reducer):
         self._reducers.append(reducer)
 
+    # Returns a list of all reductions as determined by the reducers
     def reduce_possibilities(self, possibilities):
 
         reductions = []
@@ -16,13 +18,6 @@ class PossibilitiesReducer():
             reductions.extend(reduction)
 
         return reductions
-
-    def _count_total_possibilities(self, possibilities):
-        total = 0
-        for row in possibilities:
-            for position in row:
-                total += len(position)
-        return total
 
 
 def main():

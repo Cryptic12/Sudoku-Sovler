@@ -22,12 +22,14 @@ class SudokuModel:
         self._square_size = square_size
         self.init_empty_board()
 
+    # Loads the board into the model
     def load_board(self, board):
         self.verify_board(board)
         for row in range(0, self._board_size):
             for column in range(0, self._board_size):
                 self.set_value((row, column), board[row][column])
 
+    # Checks that the board will work with the configured model
     def verify_board(self, board):
 
         if len(board) != self._board_size:
@@ -39,6 +41,7 @@ class SudokuModel:
                 raise ValueError(
                     f'Column count in row {i + 1} not equal to board size. Expected {self._board_size} recieved {len(board)}')
 
+    # Sets up a empty board
     def init_empty_board(self):
         board = []
         row = []
@@ -50,13 +53,12 @@ class SudokuModel:
 
         self._board = board
 
+    # Notifies all subscribers of the event
     def _notify(self, event):
         for subscriber in self._subscribers:
             subscriber.notify(event)
 
-    def notify(self, event):
-        self._notify(event)
-
+    # Adds a subscriber to the model
     def subscribe(self, subscriber):
         id = 0
         while id < self._max_subs:
@@ -68,6 +70,7 @@ class SudokuModel:
                 self._subscribers.append(subscriber)
                 return subscriber
 
+    # Removes the given subscriber
     def unsubscribe(self, id):
         if (id in self._subscriber_ids):
             for i in range(0, len(self._subscribers)):
@@ -78,38 +81,20 @@ class SudokuModel:
 
         return False
 
+    # Returns the board
     def get_board(self):
         return self._board
 
+    # Returns the board size
     def get_board_size(self):
         return self._board_size
 
-    def get_row(self, row):
-        return self._board[row]
-
-    def get_column(self, column):
-        values = []
-        for i in range(0, self._board_size):
-            values.append(self._board[i][column])
-
-        return values
-
-    def get_square(self, square):
-        to_return = []
-        column_pos = math.floor(square / self._square_size) * self._square_size
-        row_pos = (square % self._square_size) * self._square_size
-        board = self._board
-        for x in range(column_pos, column_pos + self._square_size):
-            curRow = board[x]
-            for y in range(row_pos, row_pos + self._square_size):
-                value = curRow[y]
-                to_return.append(value)
-        return to_return
-
+    # Returns the value of the given position
     def get_value(self, position):
         row, column = position
         return self._board[row][column]
 
+    # Sets the postiion to the given value
     def set_value(self, position, value):
         row, column = position
         self._board[row][column] = value
@@ -119,16 +104,20 @@ class SudokuModel:
 
         self._notify(event)
 
+    # Returns the possibilities
     def get_possibilities(self):
         return self._possibilities
 
+    # Set the possibilities
     def set_possibilities(self, possibilities):
         self._possibilities = possibilities
 
+    # Get the possibilities for a given position
     def get_position_possibilities(self, position):
         row, column = position
         return self._possibilities[row][column]
 
+    # Set the possibilities for a given position
     def set_position_possibilities(self, position, possibility):
         row, column = position
         self._possibilities[row][column] = possibility
