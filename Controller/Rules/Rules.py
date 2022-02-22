@@ -101,8 +101,7 @@ class SquareRule(Rule):
 
     def get_positions(self, square):
         positions = []
-        ROW_BASE = math.floor(square / self.square_size) * self.square_size
-        COLUMN_BASE = (square % self.square_size) * self.square_size
+        ROW_BASE, COLUMN_BASE = self.get_base_values(square)
         for row in range(self.square_size):
             for column in range(self.square_size):
                 positions.append((ROW_BASE + row, COLUMN_BASE + column))
@@ -111,7 +110,7 @@ class SquareRule(Rule):
 
     def get_all_positions(self):
         squares = []
-        for square in range(9):
+        for square in range(self.board_size):
             squares.append(self.get_positions(square))
         return squares
 
@@ -122,6 +121,14 @@ class SquareRule(Rule):
         affected_positions = set(self.get_positions(square))
         affected_positions.remove(position)
         return affected_positions
+
+    # Returns the row and column indexes of the top left position of the square.
+    # Used as the base to calculate the indexes of all other positions in the square
+    def get_base_values(self, square):
+        SQUARES_PER_ROW = round(self.board_size / self.square_size)
+        ROW_BASE = math.floor(square / SQUARES_PER_ROW) * SQUARES_PER_ROW
+        COLUMN_BASE = (square % SQUARES_PER_ROW) * SQUARES_PER_ROW
+        return (ROW_BASE, COLUMN_BASE)
 
     def _base_calculator(self, base):
         return math.floor(base / self.square_size) * self.square_size

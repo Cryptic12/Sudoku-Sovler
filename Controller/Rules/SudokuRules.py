@@ -20,23 +20,25 @@ class SudokuRules():
         possibilities = []
         solved_positions = []
 
-        for x in range(BOARD_SIZE):
+        for row_index in range(BOARD_SIZE):
             row = []
-            for y in range(BOARD_SIZE):
+            for column_index in range(BOARD_SIZE):
+
                 allowed_values = set()
-                if board[x][y] != "":
-                    allowed_values.add(board[x][y])
+
+                if board[row_index][column_index] != "":
+                    allowed_values.add(board[row_index][column_index])
                 else:
                     for value in range(1, BOARD_SIZE + 1):
                         value = str(value)
-                        if self.check(board, value, (x, y)):
+                        if self.check(board, value, (row_index, column_index)):
                             allowed_values.add(value)
 
                 row.append(allowed_values)
 
                 if len(allowed_values) == 1:
                     solved_positions.append(
-                        ((x, y), next(iter(allowed_values))))
+                        ((row_index, column_index), next(iter(allowed_values))))
 
             possibilities.append(row)
 

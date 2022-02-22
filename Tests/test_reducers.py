@@ -1,4 +1,5 @@
 import unittest
+import math
 
 # from Controller.Reducers.OnePositionReducer import OnePositionReducer
 # from Controller.Reducers.ForcedPositionsReducer import ForcedPositionsReducer
@@ -17,6 +18,73 @@ CONDITIONS = [UniqueCondition()]
 ROW_RULE = RowRule(BOARD_SIZE, CONDITIONS)
 COLUMN_RULE = ColumnRule(BOARD_SIZE, CONDITIONS)
 SQUARE_RULE = SquareRule(BOARD_SIZE, SQUARE_SIZE, CONDITIONS)
+
+
+def make_position_key(row, column):
+    return f"{row}_{column}"
+
+
+def modifiy_possibilities_by_row(possibilities, modification, row):
+    possibilities[row] = modification.starting_values
+    return possibilities
+
+
+def modifiy_possibilities_by_column(possibilities, modification, column):
+    for i in range(len(possibilities)):
+        possibilities[i][column] = modification.starting_values[i]
+    return possibilities
+
+
+def modifiy_possibilities_by_square(possibilities, modification, square, by_row=True):
+    ROW_BASE, COLUMN_BASE = SQUARE_RULE.get_base_values(square)
+    modfication_number = 0
+
+    for i in range(SQUARE_SIZE):
+        for j in range(SQUARE_SIZE):
+            row = ROW_BASE + i if by_row else ROW_BASE + j
+            column = COLUMN_BASE + j if by_row else COLUMN_BASE + i
+            possibilities[row][column] = modification.starting_values[modfication_number]
+            modfication_number += 1
+
+    return possibilities
+
+
+def make_modification_map_row(reductions, row):
+    expected_reductions = dict()
+
+    for column in reductions:
+        position_key = make_position_key(row, column)
+        expected_reductions[position_key] = reductions[column]
+
+    return expected_reductions
+
+
+def make_modification_map_column(reductions, column):
+    expected_reductions = dict()
+
+    for row in reductions:
+        position_key = make_position_key(row, column)
+        expected_reductions[position_key] = reductions[row]
+
+    return expected_reductions
+
+
+def make_modification_map_square(reductions, square, by_row=True):
+    ROW_BASE, COLUMN_BASE = SQUARE_RULE.get_base_values(square)
+
+    expected_reductions = dict()
+
+    for i in reductions:
+        modified_row = ROW_BASE + \
+            math.floor(i / SQUARE_SIZE) if by_row else ROW_BASE + \
+            (i % SQUARE_SIZE)
+        modified_column = COLUMN_BASE + \
+            (i % SQUARE_SIZE) if by_row else COLUMN_BASE + \
+            math.floor(i / SQUARE_SIZE)
+        position_key = make_position_key(modified_row, modified_column)
+        expected_reductions[position_key] = reductions[i]
+
+    return expected_reductions
 
 
 class TestOnePositionReducer(unittest.TestCase):
@@ -96,67 +164,57 @@ class TestOnePositionReducer(unittest.TestCase):
             message_parts.append(f"{cur_row}")
         return "\n".join(message_parts)
 
+    def _generic_test(self, rule, modification, expected_reductions):
+        reductions = self.reducer.generic_reduce(
+            self.base_possibilities, rule.get_all_positions())
+
+        self.assertEqual(len(reductions), len(modification.reductions))
+
+        for reduction in reductions:
+            position, change = reduction
+            row, column = position
+            position_key = make_position_key(row, column)
+
+            self.assertIn(position_key, expected_reductions)
+            self.assertSetEqual(change, expected_reductions[position_key])
+
     def test_row_mode(self):
         """ Tests that the single value is correctly detected in a row """
         MODIFIED_ROW = 2
         for modification in self.tests:
-            self.base_possibilities[MODIFIED_ROW] = modification.starting_values
-            reductions = self.reducer.generic_reduce(
-                self.base_possibilities, ROW_RULE.get_all_positions())
+            self.base_possibilities = modifiy_possibilities_by_row(
+                self.base_possibilities, modification, MODIFIED_ROW)
 
-            self.assertEqual(len(reductions), len(modification.reductions))
+            expected_reductions = make_modification_map_row(
+                modification.reductions, MODIFIED_ROW)
 
-            for reduction in reductions:
-                position, change = reduction
-                _, column = position
-                self.assertIn(column, modification.reductions)
-                self.assertSetEqual(change, modification.reductions[column])
+            self._generic_test(ROW_RULE, modification, expected_reductions)
 
     def test_column_mode(self):
         """ Tests that the single value is correctly detected in a column """
         MODIFIED_COLUMN = 2
         for modification in self.tests:
-            for i in range(len(self.base_possibilities)):
-                self.base_possibilities[i][MODIFIED_COLUMN] = modification.starting_values[i]
+            self.base_possibilities = modifiy_possibilities_by_column(
+                self.base_possibilities, modification, MODIFIED_COLUMN)
 
-            reductions = self.reducer.generic_reduce(
-                self.base_possibilities, COLUMN_RULE.get_all_positions())
+            expected_reductions = make_modification_map_column(
+                modification.reductions, MODIFIED_COLUMN)
 
-            self.assertEqual(len(reductions), len(modification.reductions))
-
-            for reduction in reductions:
-                position, change = reduction
-                row, _ = position
-                self.assertIn(row, modification.reductions)
-                self.assertSetEqual(change, modification.reductions[row])
+            self._generic_test(COLUMN_RULE, modification, expected_reductions)
 
     def test_square_mode(self):
         """ Tests that the single value is correctly detected in a square """
-        ROW_BASE = 3
-        COLUMN_BASE = 3
+        MODIFIED_SQUARE = 4
 
         for modification in self.tests:
 
-            modfication_number = 0
+            self.base_possibilities = modifiy_possibilities_by_square(
+                self.base_possibilities, modification, MODIFIED_SQUARE)
 
-            for i in range(3):
-                for j in range(3):
-                    row = ROW_BASE + i
-                    column = COLUMN_BASE + j
-                    self.base_possibilities[row][column] = modification.starting_values[modfication_number]
-                    modfication_number += 1
+            expected_reductions = make_modification_map_square(
+                modification.reductions, MODIFIED_SQUARE)
 
-            reductions = self.reducer.generic_reduce(
-                self.base_possibilities, SQUARE_RULE.get_all_positions())
-
-            self.assertEqual(len(reductions), len(modification.reductions))
-
-            for reduction in reductions:
-                position, change = reduction
-                row, column = position
-                index = (row % 3) * 3 + (column % 3)
-                self.assertIn(index, modification.reductions)
-                self.assertSetEqual(change, modification.reductions[index])
+            self._generic_test(SQUARE_RULE, modification, expected_reductions)
 
 
 class TestForcedPositionsReducer(unittest.TestCase):
@@ -246,67 +304,57 @@ class TestForcedPositionsReducer(unittest.TestCase):
             message_parts.append(f"{curRow}")
         return "\n".join(message_parts)
 
-    def test_row(self):
+    def _generic_test(self, rule, modification, expected_reductions):
+        reductions = self.reducer.generic_reduce(
+            self.base_possibilities, rule.get_all_positions())
+
+        self.assertEqual(len(reductions), len(modification.reductions))
+
+        for reduction in reductions:
+            position, change = reduction
+            row, column = position
+            position_key = make_position_key(row, column)
+
+            self.assertIn(position_key, expected_reductions)
+            self.assertSetEqual(change, expected_reductions[position_key])
+
+    def test_row_rule(self):
         """ Tests that the single value is correctly detected in a row """
         MODIFIED_ROW = 2
         for modification in self.tests:
-            self.base_possibilities[MODIFIED_ROW] = modification.starting_values
-            reductions = self.reducer.generic_reduce(
-                self.base_possibilities, ROW_RULE.get_all_positions())
+            self.base_possibilities = modifiy_possibilities_by_row(
+                self.base_possibilities, modification, MODIFIED_ROW)
 
-            self.assertEqual(len(reductions), len(modification.reductions))
+            expected_reductions = make_modification_map_row(
+                modification.reductions, MODIFIED_ROW)
 
-            for reduction in reductions:
-                position, change = reduction
-                _, column = position
-                self.assertIn(column, modification.reductions)
-                self.assertSetEqual(change, modification.reductions[column])
+            self._generic_test(ROW_RULE, modification, expected_reductions)
 
-    def test_column(self):
+    def test_column_rule(self):
         """ Tests that the single value is correctly detected in a column """
         MODIFIED_COLUMN = 2
         for modification in self.tests:
-            for i in range(len(self.base_possibilities)):
-                self.base_possibilities[i][MODIFIED_COLUMN] = modification.starting_values[i]
+            self.base_possibilities = modifiy_possibilities_by_column(
+                self.base_possibilities, modification, MODIFIED_COLUMN)
 
-            reductions = self.reducer.generic_reduce(
-                self.base_possibilities, COLUMN_RULE.get_all_positions())
+            expected_reductions = make_modification_map_column(
+                modification.reductions, MODIFIED_COLUMN)
 
-            self.assertEqual(len(reductions), len(modification.reductions))
+            self._generic_test(COLUMN_RULE, modification, expected_reductions)
 
-            for reduction in reductions:
-                position, change = reduction
-                row, _ = position
-                self.assertIn(row, modification.reductions)
-                self.assertSetEqual(change, modification.reductions[row])
-
-    def test_square(self):
+    def test_square_rule(self):
         """ Tests that the single value is correctly detected in a square """
-        ROW_BASE = 3
-        COLUMN_BASE = 3
+        MODIFIED_SQUARE = 4
 
         for modification in self.tests:
 
-            modfication_number = 0
+            self.base_possibilities = modifiy_possibilities_by_square(
+                self.base_possibilities, modification, MODIFIED_SQUARE)
 
-            for i in range(SQUARE_SIZE):
-                for j in range(SQUARE_SIZE):
-                    row = ROW_BASE + i
-                    column = COLUMN_BASE + j
-                    self.base_possibilities[row][column] = modification.starting_values[modfication_number]
-                    modfication_number += 1
+            expected_reductions = make_modification_map_square(
+                modification.reductions, MODIFIED_SQUARE)
 
-            reductions = self.reducer.generic_reduce(
-                self.base_possibilities, SQUARE_RULE.get_all_positions())
-
-            self.assertEqual(len(reductions), len(modification.reductions))
-
-            for reduction in reductions:
-                position, change = reduction
-                row, column = position
-                index = (row % 3) * 3 + (column % 3)
-                self.assertIn(index, modification.reductions)
-                self.assertSetEqual(change, modification.reductions[index])
+            self._generic_test(SQUARE_RULE, modification, expected_reductions)
 
 
 class TestForcedPositionsInSquareReducer(unittest.TestCase):
@@ -380,63 +428,41 @@ class TestForcedPositionsInSquareReducer(unittest.TestCase):
             message_parts.append(f"{curRow}")
         return "\n".join(message_parts)
 
-    def test_row(self):
+    def _generic_test(self, rule, modification, expected_reductions):
+        reductions = self.reducer.generic_reduce(
+            self.base_possibilities, rule.get_all_positions())
+
+        self.assertEqual(len(reductions), len(modification.reductions))
+
+        for reduction in reductions:
+            position, change = reduction
+            row, column = position
+            position_key = make_position_key(row, column)
+
+            self.assertIn(position_key, expected_reductions)
+            self.assertSetEqual(change, expected_reductions[position_key])
+
+    def test_row_rule(self):
+        MODIFIED_SQUARE = 0
         for modification in self.tests:
-            current_value = 0
-            positions_being_tested = []
-            for row in range(SQUARE_SIZE):
-                for column in range(SQUARE_SIZE):
-                    self.base_possibilities[row][column] = modification.starting_values[current_value]
-                    positions_being_tested.append((row, column))
-                    current_value += 1
+            self.base_possibilities = modifiy_possibilities_by_square(
+                self.base_possibilities, modification, MODIFIED_SQUARE)
 
-            reductions = self.reducer.generic_reduce(
-                self.base_possibilities, ROW_RULE.get_all_positions())
+            expected_reductions = make_modification_map_square(
+                modification.reductions, MODIFIED_SQUARE)
 
-            self.assertEqual(len(reductions), len(modification.reductions))
+            self._generic_test(ROW_RULE, modification, expected_reductions)
 
-            for reduction in reductions:
-                position, change = reduction
-                row, column = position
-                index = (row % 3) * 3 + (column % 3)
-                self.assertIn(index, modification.reductions)
-                self.assertSetEqual(change, modification.reductions[index])
-
-    def test_column(self):
+    def test_column_rule(self):
+        MODIFIED_SQUARE = 0
         for modification in self.tests:
-            current_value = 0
-            positions_being_tested = []
-            for column in range(SQUARE_SIZE):
-                for row in range(SQUARE_SIZE):
-                    self.base_possibilities[row][column] = modification.starting_values[current_value]
-                    positions_being_tested.append((row, column))
-                    current_value += 1
+            self.base_possibilities = modifiy_possibilities_by_square(
+                self.base_possibilities, modification, MODIFIED_SQUARE, False)
 
-            reductions = self.reducer.generic_reduce(
-                self.base_possibilities, COLUMN_RULE.get_all_positions())
+            expected_reductions = make_modification_map_square(
+                modification.reductions, MODIFIED_SQUARE, False)
 
-            self.assertEqual(len(reductions), len(modification.reductions))
-
-            for reduction in reductions:
-                position, change = reduction
-                row, column = position
-                index = (column % 3) * 3 + (row % 3)
-                self.assertIn(index, modification.reductions)
-                self.assertSetEqual(change, modification.reductions[index])
-
-
-# The checks are the same across the tests. Should be able to extract the assertions into the below functions
-
-def row_check():
-    pass
-
-
-def column_check():
-    pass
-
-
-def square_check():
-    pass
+            self._generic_test(COLUMN_RULE, modification, expected_reductions)
 
 
 if __name__ == '__main__':

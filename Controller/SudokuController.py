@@ -27,7 +27,7 @@ class SudokuController:
             return self._solved
 
         BOARD_SIZE = self._sudoku_model.get_board_size()
-        target_possibilities_total = BOARD_SIZE * BOARD_SIZE
+        BOARD_POSITIONS_COUNT = BOARD_SIZE * BOARD_SIZE
 
         self.generate_possibilities()
         prev_possibilites_total = self.count_possibilities()
@@ -45,7 +45,7 @@ class SudokuController:
 
             possibilites_total = self.count_possibilities()
 
-            if possibilites_total == target_possibilities_total:
+            if possibilites_total == BOARD_POSITIONS_COUNT:
                 self._solved = True
 
             if possibilites_total == prev_possibilites_total:
